@@ -1,0 +1,65 @@
+\documentclass[quantum.tex]{subfiles}
+
+\begin{document}
+\section{Quantum Gates}
+
+Quantum gates are esstentially unitary operators on Hilbert spaces. These unitary operators act on single qubits by rotating them along the Bloch sphere.
+
+\subsection{Hadamard Gates}
+There are many gates that do not have classical analogues. One example is the Hadamard gate $H: \mathbb{C}^2 \rightarrow \mathbb{C}^2$
+\begin{gather*}
+  \ket{0} \mapsto \frac{1}{\sqrt{2}}(\ket{0} + \ket{1}) \\
+  \ket{1} \mapsto \frac{1}{\sqrt{2}}(\ket{0} - \ket{1})
+\end{gather*}
+which is represented as the matrix:
+$$ H =  \frac{1}{\sqrt{2}} \begin{bmatrix} 1 & 1 \\ 1 & -1 \end{bmatrix} $$
+We can see from the definition that $H$ takes a qubit and sends it to a superposition between $\ket{0},\ket{1}$. $H$ is unitary as $H^2 = I$:
+$$H^2 = \frac{1}{2} \begin{bmatrix} 1 & 1 \\ 1 & -1 \end{bmatrix}^2 = \frac{1}{2}\begin{bmatrix} 2 & 0 \\ 0 & 2 \end{bmatrix} = I $$
+%
+We can directly calculate the effect the Hadamard gate has on $n$-qubits as such:
+%
+$$ H^{\otimes n} \ket{j_{n-1}...j_0} = \frac{1}{\sqrt{2^n}}\bigotimes_{l=0}^{n-1} (\ket{0} + e^{i\pi j_l}\ket{1}) $$
+%
+where $j_i = \{0,1\}$ for $0 \leq i \leq n-1$.
+
+It's worth mentioning that $H^{\otimes n}$ is a special case of the \textit{Quantum Fourier Transform (QFT)} which is in turn a manifestation of the \textit{Fourier Transform on Finite Abelian Groups}. In this case, our abelian group will be $\mathbb{Z}_2^n$.
+%
+\begin{equation}
+  F_{\mathbb{Z}_2^n} = \frac{1}{\sqrt{2^n}} \sum_{x,y=0}^{2^n-1} (-1)^{x \cdot y} \ket{y}\bra{x} = H^{\otimes n}
+\end{equation}
+
+These topics are covered in more detail in subsequent section.
+%
+Consequently, an \textit{equal} superposition where the probabilities for measuring a given $n$-qubit state are uniform:
+$$H^{\otimes n}\ket{0...0} = \frac{1}{\sqrt{2^n}}\sum_{i=0}^{2^n-1}\ket{i}$$
+
+This superposition is instrumental in many quantum algorithms such as Grover's algorithm to extract useful information from oracles as it very roughly contains a ``uniform" amount of information for every $n$-bit string. By this virtue, we can query all inputs to the oracle in tandem. However, we will still be left with a superposition even after the oracle query, so extracting this information is not simple to see at first.
+
+\subsection{CNOT Gates}
+Define the CNOT (Controlled-Not Gate) as the operator which takes a two-qubit system transforms as follows:
+\begin{gather*}
+  \ket{0}\ket{0} \mapsto \ket{0}\ket{0} \\
+  \ket{0}\ket{1} \mapsto \ket{0}\ket{1} \\
+  \ket{1}\ket{0} \mapsto \ket{1}\ket{1} \\
+  \ket{1}\ket{1} \mapsto \ket{1}\ket{0}
+\end{gather*}
+The qubit on the bottom (target qubit) flips in respect to the value of the top qubit (control qubit). The corresponding matrix representation of $CNOT: \mathbb{C}^2 \rightarrow \mathbb{C}^2$ is:
+
+\begin{figure}[h]
+  \centering
+  \leavevmode
+  \begin{equation}
+    CNOT = \begin{bmatrix}1 & 0 & 0 & 0 \\ 0 & 1 & 0 & 0 \\ 0 & 0 & 0 & 1 \\ 0 & 0 & 1 & 0 \end{bmatrix}
+  \end{equation}
+  \Qcircuit {
+       & \ctrl{1} & \qw \\
+       & \targ & \qw
+    }
+    \caption{Matrix representaion of CNOT and its corresponding gate}
+\end{figure}
+
+%Phase gates. Toffoli gates. Solovey-Kiteav result.
+
+We can extend this idea to create a set of \textit{generalized} CNOT gates with the following matrices:
+
+\end{document}

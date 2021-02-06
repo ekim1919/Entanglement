@@ -1,2 +1,2 @@
-# Entanglement
-Set of Notes elaborating on Bipartite Entanglement Theory and QIT
+# Quantum Information Theory Notes
+Set of Notes elaborating on Entanglement Theory, QIT, and other topics I wish to understand and master.

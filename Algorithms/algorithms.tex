@@ -1,0 +1,258 @@
+\documentclass{../quantum.tex}
+
+\begin{document}
+\section{Quantum Algorithms}
+
+This section will simply be a catalogue of ``classical" quantum algorithms and some of their properties. Many of these subsections will be based on the presentation given in \cite{childs17}.
+
+\subsection{Deutsch-Jozsa Algorithm}
+Let $f: \{0,1\} \rightarrow \{0,1\}$ be a boolean function with one-bit input. We would like to ascertain if $f$ is either constant (both inputs have the same value) or balanced (inputs have different values). Through the classical perspective, one would have to query the function twice to determine the state of $f$ as constant or balanced. However, we can leverage quantum mechanics so that $f$ will only have to be queried once.
+%
+The following circuit accomplishes this:
+
+\begin{figure}[ht]
+    \centering
+    \leavevmode
+    \Qcircuit {
+       \ket{0} & \gate{H} & \multigate{1}{U_f} & \gate{H} & \meter \\
+       \ket{1} & \gate{H} & \ghost{U_f} & \qw & \qw
+    }
+    \caption{Deutsch-Jozsa circuit}
+\end{figure}
+%
+where $U_f$ is the map with the action: $\ket{x}\ket{y} \mapsto \ket{x}\ket{y \oplus f(x)}$. We calculate the action of the first two steps of the circuit above as follows:
+%
+\begin{gather}
+  \ket{0}\ket{1} \rightarrow \frac{1}{2}(\ket{0} + \ket{1})(\ket{0} - \ket{1}) = \frac{1}{2}(\ket{0}(\ket{f(0)} - \ket{1 \oplus f(0)}) + \ket{1}(\ket{f(1)} - \ket{1 \oplus f(1)})) = \\
+  \frac{1}{2}\sum_{x \in \{0,1\}} \ket{x}(\ket{f(x)} - \ket{1 \oplus f(x)}) = \\
+  \frac{1}{\sqrt{2}} \sum_{x \in \{0,1\}} (-1)^{f(x)}\ket{x} \frac{1}{\sqrt{2}}(\ket{0} -
+  \ket{1})
+\end{gather}
+By ignoring the second register, we apply the Hadamard gate to the first register to get $\ket{0}$ up to a global phase if $f$ is constant and $\ket{1}$ if $f$ is balanced. Thus, if we measure the first register, we get the respective results with certainty.
+
+In this algorithm, we only query the $f$-oracle once instead of twice as dictated by classical intuition. In fact, we can generalize this to a $n$-bit boolean function $f:\{0,1\}^n \rightarrow \{0,1\}$ where $f$ is guaranteed to be either constant (all $n$-bit input strings map to the same value) or balanced (there are an equal number of bit strings mapping to both $0,1$).
+
+We apply $H^{\otimes (n+1)}$ to the first register of $n$-qubits and the second result register and another iteration of $H^{\otimes n}$ after applying the $U_f$ gate accepting $n$-qubits:
+
+\begin{gather}
+\ket{0...0}\ket{1} \xrightarrow{H^{\otimes (n+1)}} \frac{1}{\sqrt{2^n}} \sum_{x = 0}^{2^n -1} \ket{x}\frac{1}{\sqrt{2}}(\ket{0}-\ket{1}) \xrightarrow{U_f} \frac{1}{\sqrt{2^n}} \sum_{x = 0}^{2^n -1} (-1)^{f(x)}\ket{x}\frac{1}{\sqrt{2}}(\ket{0}-\ket{1})
+\end{gather}
+
+If we now discard the second result register and apply $H^{\otimes n}$ again to the first register, we yield:
+$$\sum_{x = 0}^{2^n -1} (-1)^{f(x)}\ket{x}\frac{1}{\sqrt{2}}(\ket{0}-\ket{1}) \xrightarrow{H^{\otimes n}} \begin{cases} e^{i\pi
+f(x)}\ket{0...0} \text{ if $f$ is constant} \\
+\ket{y}, y \neq 0 \text{ if $f$ is balanced}
+\end{cases}$$
+Thus, if we measure the first register, we measure with certainty $\ket{0}$ if $f$ is constant and some other value if $f$ is balanced as desired. Once again, this scheme only queries the $f$-oracle once.
+
+\subsection{Bernstein-Vazirani Algorithm}
+We can use the Deutsch-Jozsa circuit to reveal hidden traits for another special class of boolean functions. Let $f\{0,1\}^n \rightarrow \{0,1\}$ be of the following form:
+$$f(x) = a\cdot x \oplus b \mod 2$$ where $\oplus$ refers to bitwise binary addition and $\cdot$ refers to the dot product i.e $x \cdot y = \sum_{i=1}^n x_iy_i \mod 2$. $a \in \{0,1\}^n$ and $b \in \{0,1\}$ are hidden, and we wish to find these constants. In the classical world, we would have to query the oracle $\mathcal{O}(n)$ times to find both constants $a,b$. By using the Deutsch-Jozsa circuit, we can drop this to $\mathcal{O}(1)$ queries. We use the exact circuit above and calculate the effect of the circuit:
+
+\begin{gather}
+  \ket{0...0}\ket{1}\xrightarrow{H^{\otimes (n+1)}} \frac{1}{\sqrt{2^n}} \sum_{x=0}^{2^n-1}\ket{x}\frac{1}{\sqrt{2}}(\ket{0} - \ket{1}) \xrightarrow{U_f} \\
+  \frac{1}{\sqrt{2^n}} \sum_{x=0}^{2^n-1}\ket{x}\frac{1}{\sqrt{2}}(\ket{f(x)} - \ket{1\oplus f(x)}) = \frac{1}{\sqrt{2^n}} \sum_{x=0}^{2^n-1}\ket{x}\frac{1}{\sqrt{2}}(\ket{a\cdot x \oplus b} - \ket{1 \oplus (a \cdot x \oplus b)}) = \\
+  \frac{1}{\sqrt{2^n}} \sum_{x=0}^{2^n-1}(-1)^b \ket{x}\frac{1}{\sqrt{2}}(\ket{a\cdot x} - \ket{1 \oplus (a \cdot x)}) = \frac{(-1)^b}{\sqrt{2^n}} \sum_{x=0}^{2^n-1}(-1)^{a\cdot x}\ket{x}\frac{1}{\sqrt{2}}(\ket{0} - \ket{1})
+\end{gather}
+
+We prove a lemma showing destructive interference for certain terms: \newline
+
+\begin{lemma} \label{dotprod}
+  Let $z \in \{0,1\}^n$. Then
+  $$\sum_{x=0}^{2^n-1} (-1)^{z \cdot x} = 0$$ iff $z \neq 0$
+\end{lemma}
+\begin{proof}
+   We begin by expanding the form above:
+   $$\sum_{x=0}^{2^n-1} (-1)^{z \cdot x} = \sum_{x=0}^{2^n -1}\prod_{j=1}^n (-1)^{z_jx_j} = \sum_{x_n = 0}^1...\sum_{x_2 = 0}^1\sum_{x_1 = 0}^1 \prod_{j=1}^n (-1)^{z_jx_j}   $$
+   The last equality easily follows from the fact that we can rearrange the sum in the specific order imposed by the summation on the right.
+
+   Now suppose there exists $1 \leq r \leq n$ such that $z_r = 1$. From the form above, we derive that:
+   $$\sum_{x_n = 0}^1...\sum_{x_2 = 0}^1\sum_{x_1 = 0}^1 \prod_{j=1}^n (-1)^{z_jx_j} = \sum_{x_n = 0}^1...\sum_{x_{r+1} = 0}^1\sum_{x_{r-1} = 0}^1... \sum_{x_2 = 0}^1\sum_{x_1 = 0}^1 \prod_{j=1,j \neq r}^n (-1)^{z_jx_j} ((-1)^0 + (-1)^1) = 0 $$
+
+   Note that from $\sum_{x=0}^{2^n-1} (-1)^{z \cdot x} \ket{x} = 2^n\delta_{z,0}$, we have the converse as well.
+\end{proof}
+
+We cannot use this lemma directly on the form representing the first $n$-qubit register above as the sum involves constituent states $\ket{x}$ tied to the $(-1)^{z\cdot x}$. To fix this, we first apply $H^{\otimes n}$ on the first register:
+
+\begin{gather}
+  \frac{(-1)^b}{\sqrt{2^n}} \sum_{x=0}^{2^n-1}(-1)^{a\cdot x}\ket{x} \xrightarrow{H^{\otimes n}} \frac{(-1)^b}{2^n}\sum_{x=0}^{2^n -1}  (-1)^{a\cdot x} \sum_{y=0}^{2^n -1} (-1)^{y \cdot x} \ket{y} = \\
+  \frac{(-1)^b}{2^n}\sum_{y=0}^{2^n -1} \sum_{x=0}^{2^n -1} (-1)^{(a+y)\cdot x} \ket{y}
+\end{gather}
+%
+We now apply Lemma \ref{dotprod} to the first register above to find that it equals:
+$$(-1)^b \ket{a} $$ Thus, by measuring the first register, we get the value of $a$ off by some phase factor.
+
+The main argument for the correctness of the algorithm stems from the destructive interference resulting from the operation of running an equal superposition of all $2^n$ possible bit-strings which can $x$ take, then ``merging" them together and letting destructive interference take its course.
+
+
+\subsection{Grover's Algorithm}
+
+Let $X$ be an unstructured database of size $N$. We can simply think of $X$ as an array with elements $\{1,...,N\}$ not necessarily in sorted order. Classically, we would have to query the database $\mathcal{O}(N)$ times. However, Grover's algorithm shows that it is possible to leverage quantum phenomena to bring this down to $\mathcal{O}(\sqrt{N})$ queries.
+
+For the sake of a simpler analysis, let $f:\{0,1\}^n \rightarrow \{0,1\}^n$ be a boolean function representing an unstructured database of size $2^n$ with a single marked element $w \in \{0,n\}^n$.
+$$ f(x) = \begin{cases}
+            1 \text{ if } x = w \\
+            0 \text{ otherwise}
+          \end{cases} $$
+The crux of the algorithm comes from iterating a specially constructed unitary transformation $G$ composed with the oracle query gate $U_f$.
+$$ G = H^{\otimes n}(-I + 2\ket{0}\bra{0})H^{\otimes n} $$
+%
+Let us compute the action of $G$ on $\ket{x} \in (\mathbb{C}^2)^{\otimes n}$ as follows: We first compute the below expression:
+%
+\begin{gather}
+  (-I + 2 \ket{0} \bra{0}) H^{\otimes n} \ket{x} = (-I + 2\ket{0}\bra{0})) \frac{1}{\sqrt{2^n}}\sum_{y=0}^{2^n-1} (-1)^{y\cdot x}\ket{y} = \\
+  \frac{1}{\sqrt{2^n}} \big[ -\sum_{y=0}^{2^n-1}(-1)^{y\cdot x}\ket{y} + 2\ket{0}\big]
+\end{gather}
+%
+Now we apply the last $n$-qubit Hadamard transform to yield the following:
+%
+\begin{gather}
+  \frac{1}{\sqrt{2^n}}H^{\otimes n} \big[-\sum_{y=0}^{2^n-1}(-1)^{y\cdot x}\ket{y} + 2\ket{0} \big] = \frac{1}{2^n}\big[-\sum_{z = 0}^{2^n-1} \sum_{y=0}^{2^n-1}(-1)^{y\cdot(x+z)} \ket{y} + 2 \sum_{z = 0}^{2^n-1} \ket{z} \big] = \\
+  \frac{1}{2^n}(-2^n\ket{x} + 2 \ket{S})
+\end{gather}
+%
+where $\ket{S} = \sum_{z = 0}^{2^n-1} \ket{z}$ refers to the equally-weighted superposition state of $n$-qubits.
+%
+The second-to-last equality follows from reindexing the sum with $y$-indices instead of $z$-indices. Note that the Hadamard transform is an inverse of itself, giving us $-\ket{x}$ as the first term.
+%
+Thus, we get that:
+%
+$$G\ket{x} = -\ket{x} + \frac{2}{2^n}\ket{S} $$
+%
+and we deduce the following $2^n\times 2^n$ matrix representation:
+$$G = \left[ \begin{matrix}
+        -1 + \frac{2}{2^n} & \frac{2}{2^n} & ... & \frac{2}{2^n} \\
+        \frac{2}{2^n} & -1 + \frac{2}{2^n} & ... & \frac{2}{2^n} \\
+        . & . &  ... & . \\
+        . & . &  ... & . \\
+        . & . &  ... & . \\
+        \frac{2}{2^n} & \frac{2}{2^n} & ... & -1 + \frac{2}{2^n}
+      \end{matrix} \right]
+ $$
+
+The iteration of $GU_f$ has a geometric interpretation which we will now consider. Let $\ket{S}$ be the equally-weighted superposition and let $\ket{x_0}$ be the marked item:
+$$ \ket{S} = \frac{1}{\sqrt{N}} \sum_{x=0}^{2^n-1} \ket{x}  $$
+
+Let $\theta$ be the angle between $S$ and $x_0^{\perp} = \frac{1}{\sqrt{N-1}}\sum_{x\neq x_0} \ket{x}$. This gives us the following representation:
+$$ \ket{S} =  \sin{\theta}x_0 + \cos{\theta}{x_0^{\perp}}$$
+Note that
+$$ \ket{S} = \frac{1}{\sqrt{N}}\sum_{x \neq x_0} \ket{x} + \frac{1}{\sqrt{N}}\ket{x_0} = \sqrt{\frac{N-1}{N}}\ket{x_0^{\perp}} + \frac{1}{\sqrt{N}}\ket{x_0}$$
+Thus,
+$$\sin{\theta} = \bra{x_0}\ket{S} = \frac{1}{\sqrt{N}}$$
+implying that
+$$ \theta \approx \frac{1}{\sqrt{N}} $$ for sufficiently large $N$.
+We claim the following:
+\begin{enumerate}
+  \item $U_f$ corresponds to a reflection across hyperplane orthogonal to $\ket{x_0}$.
+  \item $G$ corresponds to a reflection across hyperplane orthogonal to $\ket{S}$.
+\end{enumerate}
+
+These two operations rotate generic unit vector $\ket{\Psi}$ by $2\theta$. To see this, imagine a generic unit vector $\ket{\Psi}$ some angle $\theta_0$ from $x_0^{\perp}$ on the two-dimensional plane spanned by $\ket{x_0}$ and $\ket{x_0^{\perp}}$. Assume that we orient our plane such that we visualize $\ket{x_0^{\perp}}$ as our horizontal axis and $\ket{x_0}$ as our vertical axis. Reflecting across the axis $\ket{x_0^{\perp}}$ rotates our $\ket{\Psi}$ $2\theta_0$ clockwise, giving position $-\theta_0$. Then reflecting it across axis $\ket{S}$ rotates it by $2(\theta_0 + \theta)$, giving the angle $2(\theta_0 + \theta) - \theta_0 = \theta_0 + 2\theta$.
+
+Since $\theta \approx \frac{1}{\sqrt{N}}$ is close to zero for sufficiently large $N$, it suffices to rotate our equally-weighted superposition $\ket{S}$ around $\frac{\pi}{2}$ to become close to $\ket{x_0}$ as $\ket{x_0^{\perp}},\ket{x_0}$ are orthogonal to each other. We thus solve the following:
+$$2k\theta \approx \frac{\pi}{2} \implies k = \frac{\sqrt{N}\pi}{4} $$
+
+This gives us that we need about $\mathcal{O}(\sqrt{N})$ iterations to give us a state when measured gives us the desired index with high probability. As each iteration queries the oracle a constant number of times, it follows that we need $\mathcal{O}(\sqrt{N})$ queries.
+
+\subsection{Quantum Fourier Transform}
+
+We now investigate the quantum analogue of the discrete Fourier transform as follows:
+%
+For an $n$-qubit system, we define the \textit{Quantum Fourier Transform}:
+%
+$$ F = \frac{1}{\sqrt{2^n}} \sum_{x,y = 0}^{2^n-1} \zeta^{xy} \ket{y}\bra{x} $$
+ where $\zeta = e^{2\pi i /2^n} $.
+%
+ This operation is unitary as we can directly check:
+ $$ F^{\dagger}F = \frac{1}{2^n} \sum_{y = 0}^{2^n-1} \sum_{x = 0}^{2^n-1} \zeta^{xy - xy} \ket{x}\bra{x} = \sum_{x = 0}^{2^n -1} \ket{x}\bra{x} = I $$
+%
+ We can explictly express the action of $F$ on a basis vector $x \in (\mathbb{C}^2)^{\otimes n}$
+\begin{gather*}
+  \begin{split}
+    F\ket{x} & = \frac{1}{\sqrt{2^n}} \sum_{y=0}^{2^n-1} \zeta^{xy} \ket{y} \\
+     & = \frac{1}{\sqrt{2^n}} \sum_{y_0=0}^{1}\sum_{y_2=0}^{1}...\sum_{y_{n-1}=0}^{1} \zeta^{x(\sum_{j=1}^n y_j2^j)} \ket{y_{n-1}} ...\ket{y_0} \\
+     & = \frac{1}{\sqrt{2^n}} \sum_{y_0=0}^{1}\sum_{y_1=0}^{1}...\sum_{y_{n-1}=0}^{1} \prod_{j=0}^{n-1} \zeta^{xy_j2^j} \ket{y_{n-1}} \ldots \ket{y_0}  \\
+    & = \frac{1}{\sqrt{2^n}} \bigotimes_{i=0}^{n-1}\sum_{y_i=0}^1 \zeta^{xy_i2^i} \ket{y_i} \\
+    & = \frac{1}{\sqrt{2^n}} \bigotimes_{i=0}^{n-1}\ket{0} + \zeta^{x2^i}\ket{1} \\
+    & = \frac{1}{\sqrt{2^n}} \bigotimes_{i=1}^{n-1}\ket{0} + \zeta^{\sum_{k=0}^{n-1} x_k2^{k+i}}\ket{1} \\
+    & = \frac{1}{\sqrt{2^n}} \bigotimes_{i=0}^{n-1}\ket{0} + e^{2\pi i(x_{n-1}2^{i-1} +x_{n-2}2^{i-2} + \ldots + x_{0} 2^{i-n}))}\ket{1} \\
+    & = \frac{1}{\sqrt{2^n}} \bigotimes_{i=0}^{n-1}\ket{0} + e^{2\pi i(x_{n- i - 1}2^{-1} +x_{n- i - 2}2^{-2} + \ldots + x_{0} 2^{i-n})}\ket{1} \\
+    & = \frac{1}{\sqrt{2^n}} \bigotimes_{i=0}^{n-1}\ket{0} + e^{2\pi i [ 0.x_{n-i-1}\ldots x_1x_0 ]} \ket{1}
+  \end{split}
+\end{gather*}
+%
+The last equality follows from the fact that any bit shift past $n-1-k$ times will result in an even power of $e^{2\pi i}$ which will always be equal to one.
+where
+$$P_i = \left[\begin{matrix} 1 & 0 \\ 0 & \zeta^{2^i} \end{matrix}\right]$$ is the phase shift gate rotating $\zeta^{2^i}$ Note that
+%
+$$ e^{2\pi i(x_{n-1-i}{2^{-1})}} = e^{\pi i x_{n-1 - i}} =
+\begin{cases}
+0 \text{ if } x_{n - 1 - i} = 0 \\
+-1 \text{ if } x_{n - 1 - i} = 1
+\end{cases}
+$$
+%
+Thus, $\ket{0} + e^{2\pi i(x_{n-1-i}{2^{-1})}}\ket{1}$ can be realized through a Hadamard transform on each $\ket{x_{n_ 1- i}}, \newline \; 0 \leq i \leq n-1$.
+%
+Now from this expression, we can construct the quantum circuit implementing the Quantum Fourier Transform for a basis vector $x$ in Figure \ref{fig:QFT}.
+\begin{figure}[h]
+  \Qcircuit @C=0.6em @R=1.2em{
+  \lstick{\ket{x_0}} & \qw & \qw & \qw & \qw & \ldots & & & \qw & \ctrl{8} & \qw  & \qw & \qw & \qw & \cdots & & & \ctrl{7} & & \qw & \cdots & & \ctrl{1} & \qw & \qw & \push{\ket{z_{n-1}}} \\
+  \lstick{\ket{x_1}} & \qw & \qw & \qw & \qw & \ldots & & &  \ctrl{7} & \qw & \qw & \qw & \qw & \qw & \cdots & & \ctrl{6} & \qw & \qw & \cdots & & & \gate{H} & \gate{P_2} & & \qw & \ket{z_{n-2}} \\
+  . \\
+  . \\
+  . \\
+  \lstick{\ket{x_{n-4}}} & \qw & \qw & \qw & \ctrl{3} & \cdots & & & \qw & \qw & \qw & \qw & \ctrl{2} & \cdots & & &\qw & \qw & \qw  & \cdots & & &\qw & \qw & \qw & \qw & \qw & \ket{z_{3}} \\
+  \lstick{\ket{x_{n-3}}} & \qw & \qw & \ctrl{2} &\qw  &\ldots & &  & \qw & \qw & \qw & \ctrl{1} & \qw & \cdots & & &\qw & \qw & \qw  & \cdots & & & & \qw & \qw & \qw & \qw & \ket{z_2} \\
+  \lstick{\ket{x_{n-2}}} & \qw & \ctrl{1} & \qw & \qw &\cdots & & & \qw  & \qw & \gate{H} & \gate{P_2} & \gate{P_3} & \cdots & & &\gate{P_{n-2}} & \gate{P_{n-1}} & \qw & \cdots & & & \qw & \qw & \qw & \qw & \ket{z_1} \\
+  \lstick{\ket{x_{n-1}}} & \gate{H} & \gate{P_2} & \gate{P_3} & \gate{P_4} &\cdots & & & \gate{P_{n-1}} & \gate{P_n} & \qw & \qw & \qw & \cdots & & & \qw & \qw & \qw & \cdots & & & \qw & \qw & \qw & \qw & \ket{z_0}
+  }
+  \caption{Quantum circuit realizing the QFT}
+  \label{fig:QFT}
+\end{figure}
+
+\subsection{Phase Estimation}
+
+The setup of the phase estimation problem is the following: one is given an unitary operator $U$ and a state $\ket{\phi}$ promised to be an eigenvector of $U$ such that
+\begin{equation}
+  U\ket{\phi} = e^{i\phi}\ket{\phi}
+\end{equation}
+%
+We wish to determine an $n$-bit estimate of $\phi$. The quantum circuit which achieves this is as below:
+%
+\begin{figure}[h]
+  \Qcircuit @C=0.6em @R=1.2em {
+  \lstick{\ket{0}} & \gate{H} & \qw & \qw & \qw & & \ldots & & \qw & \\
+  \lstick{\ket{0}} & \gate{H} & \qw & \qw & \qw & & \ldots & & \qw & \\
+  \lstick{.} \\
+  \lstick{.}  \\
+  \lstick{.}  \\
+  \lstick{\ket{0}} & \gate{H} & \qw & \ctrl{2} & \qw & &\ldots & & \qw &\\
+  \lstick{\ket{0}} & \gate{H} & \ctrl{1} & \qw & \qw  & &\ldots & & \qw &\\
+  \lstick{\ket{\phi}} & \qw & \gate{U} & \gate{U^2} & \qw & &\ldots & &
+  }
+  \caption{Phase Estimation Circuit}
+\end{figure}
+%
+We first prepare the initial quantum state as the uniform superposition:
+$$ \frac{1}{\sqrt{2^n}}\sum_{x-0}^{2^n -1} \ket{x} \otimes \ket{\phi} $$
+%
+applying the operator
+\begin{equation}
+  \sum_{x=0}^{2^n -1} \ket{x}\bra{x} \otimes U^x
+\end{equation}
+to the initial state gives way to:
+%
+$$ \sum_{x = 0}^{2^n - 1} e^{i\phi x}\ket{x} \otimes \ket{\phi} $$
+Equivalently this state can be written as:
+\begin{equation}
+    \sum_{x = 0}^{2^n-1} e^{\frac{\phi}{2 \pi} [2 \pi i x ] } \ket{x} \otimes \ket{\phi}
+\end{equation}
+Suppose that $\phi/2 \pi$ terminates after at most $n$-bits or if $\frac{\phi}{2\pi} = y/2^n$ for some $y \in \mathbb{Z}_{2^n}$.
+%
+Then $\phi = \frac{2\pi y}{2^n}$. Substituting this in the expression above and applying the inverse QFT to the first $n$ registers will result in the state $\ket{y} \otimes \phi$. Therefore, measuring on the first register will give us the exact value of $y$.
+
+(Todo: think about the general case)
+
+
+\end{document}

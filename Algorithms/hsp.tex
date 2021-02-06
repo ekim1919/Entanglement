@@ -1,0 +1,161 @@
+\documentclass{../quantum.tex}
+
+\begin{document}
+\section{The Hidden Subgroup Problem and its Applications}
+
+The Hidden Subgroup Problem (HSP) can be phrased by first introducing the following oracle:
+%
+Suppose I have a finite group $G$ along with a function $f: G \rightarrow S$ with some finite set $S$. Furthermore, a guarantee is given that $f$ is constant on cosets of some
+\textit{hidden subgroup} $H < N$:
+%
+$$ f(x) = f(y) \text{ iff } x^{-1}y \in H $$
+
+We wish to determine $H$ through a generator representation by quering the oracle preferrably as little as needed. Determining such a subgroup is important in studying Quantum algorithms to algebraic problems. This section will focus on one such application where this problem naturally appears: {\bf Shor's Algorithm} for finding the discrete logarithm.
+%
+
+\subsection{Shor's Algorithm: Discrete Logarithm}
+First, we set the stage. Suppose that I have a finite cyclic group $G = \langle g \rangle$. To simplify the presentation, let us assume that the order of $G$ is known beforehand. In general, we do not know the period of an arbitrary cyclic group. Furthermore, let us assume that $x \neq g$ as this can be checked in constant time.
+%
+
+Now we define a function $f: \mathbb{Z}_N \times \mathbb{Z}_N \rightarrow G$:
+\begin{equation}
+  f(\alpha,\beta) = g^{\alpha\log_g{x} + \beta}
+\end{equation}
+This is simply $f(\alpha,\beta) = x^{\alpha}g^{\beta}$. From this form, the function $f$ is seen to be efficiently computable since computing $f$ only requires modular exponentiation and multiplication in $G$.
+
+We are interested in the following subgroup $H$:
+\begin{gather*}
+  \begin{split}
+    H & = \{ (\alpha,\beta) \in \mathbb{Z}_N \times \mathbb{Z}_N \mid \alpha\log_g{x} + \beta = 0\} \\
+      & = \{(0,0), (1, -\log_g{x}), (2, -2 \log_g{x}), \dots ,(N-1, -(N-1)\log_g{x}) \}
+  \end{split}
+\end{gather*}
+Observe that $f$ is constant on $H$. In fact, $f$ is constant on the cosets of $H$ as well.
+%
+\begin{gather}
+  \label{deltaline}
+(0, \delta) + H = \{(r, \delta - r \log_g{x}) \mid r \in \mathbb{Z}_N\} = \{ (\alpha,\beta) \in \mathbb{Z}_N \times \mathbb{Z}_N \mid \alpha\log_g{x} + \beta = \delta\}
+\end{gather}
+for $\delta \in \mathbb{Z}_N$. To see that the $(0,\delta)$ form a complete set of representatives of every coset $(\gamma, \delta) + H, \; \gamma,\delta \in \mathbb{Z}_N$, use Lagrange's theorem to show that $(\mathbb{Z}_N \times \mathbb{Z}_N : H) = N$. If we let $R =\{(0,\delta) \mid \delta \in \mathbb{Z}_N\}$ be set of alleged coset representatives, it suffices to show that $(0,\delta) \not\sim (0,\sigma)$ for $\delta \neq \sigma$. However, this easily seen through the definition of $H$ above. Finally, by the string of equalities shown in (\ref{deltaline}), $f$ is constant on the cosets of $H$.
+%
+
+The observations above will guide the construction of the algorithm as follows: We initialize an uniform superposition over all $(\alpha,\beta) \in \mathbb{Z}_N \times \mathbb{Z}_N $ and induce the action of $f(\alpha, \beta)$ on the state:
+%
+\begin{gather}
+  \frac{1}{N} \sum_{\alpha,\beta} \ket{\alpha, \beta} \xrightarrow{f} \frac{1}{N} \sum_{\alpha,\beta} \ket{\alpha, \beta, f(\alpha, \beta)}
+\end{gather}
+%
+We now measure the third register to receive a value $f(\alpha,\beta)$ for some $\alpha,\beta$. This will collapse the superposition to those consistent with the result, namely the elements contained in a coset of $H$:
+%
+\begin{equation}
+  \frac{1}{\sqrt{N}} \sum_{\alpha} \ket{\alpha,\delta - \alpha\log_g{x}} \quad \delta \in \mathbb{Z}_N
+\end{equation}
+%
+We now perform the Quantum Fourier Transform over $\mathbb{Z}_N \times \mathbb{Z}_N$ to yield the expression below:
+%
+\begin{gather}
+  \begin{split}
+    \frac{1}{\sqrt{N}} \sum_{\alpha} \ket{\alpha,\delta - \alpha\log_g{x}} \xrightarrow{QFT}
+    & \frac{1}{N^{3/2}} \sum_{\alpha} \big(\sum_{\sigma} \zeta_N^{\alpha\sigma} \ket{\sigma}\big) \otimes \big(\sum_{\theta} \zeta_N^{\delta\log_g{x}\theta} \ket{\theta} \big) = \\
+    & \frac{1}{N^{3/2}}\sum_{\alpha,\sigma,\theta} \zeta_N^{\alpha\sigma + (\delta - \alpha\log_g{x})\theta} \ket{\sigma,\theta}
+  \end{split}
+\end{gather}
+By rearranging some terms, we arrive at the following form:
+%
+\begin{gather}
+\frac{1}{N^{3/2}}\sum_{\sigma,\theta} \zeta_N^{\delta\theta} \sum_{\alpha} \zeta_N^{\alpha(\sigma - \log_g{x}\theta)}\ket{\sigma,\theta}.
+\end{gather}
+%
+By the identity concerning geometric sums of roots of unity:
+$$ \sum_{\alpha} \zeta_N^{\alpha\gamma} = N \delta_{0,\gamma} $$
+So, the final form will be
+%
+$$ \frac{1}{\sqrt{N}} \sum_{\sigma} \zeta_N^{\delta\theta} \ket{\theta\log_g{x},\theta} $$
+By measuring this state, we will receive one of the $(\theta\log_g{x}, \theta)$ with uniform probability. If $\theta$ has a multiplicative inverse, i.e is relatively prime to $N$, we can simply multiply $\theta\log_g{x}$ on the left to reveal the discrete logarithm. If not, we repeat the experiment until we find such a $\theta$ as it turns out that $\phi(N) / N = \Omega(1/\log\log{N})$.
+%
+\begin{remark}
+  The QFT transform above roughly transfers the information encoded into the states to the phases. By the identity above, certain phases will engage in destructive interference, leaving the useful information to be measured. This technique is known as {\bf Fourier Sampling}. We will touch Fourier Sampling in an upcoming section.
+\end{remark}
+
+\subsection{Shor's Algorithm: Period Finding}
+A similar vein of thought can be applied to the Period Finding Problem.
+
+\subsection{On the Abelian HSP}
+
+We can define a general form for the QFT over an arbitrary \textit{finite abelian} group $G$. From what we know from the representation theory of finite groups, there are exactly $|G|$ irreducible representations of degree one over $G$. Let $\hat{G} = \{\chi_y\}_{1 \leq y \leq |G|}$ be all such characters of their corresponding irreducible representations. As a minor abuse of notation, we will identify $\hat{G}$ as the indices $y$ of the characters rather than the characters themselves. The QFT over $G$ is defined appears:
+%
+\begin{equation}
+  \label{abelQFT}
+  F_{G} = \frac{1}{\sqrt{|G|}}\sum_{x \in G}\sum_{\chi_y \in \hat{G}} \chi_y(x) \ket{y}\bra{x}
+\end{equation}
+
+where we recall that a character is a function $\chi_y: G \rightarrow \mathbb{C}$ such that
+$$ \chi_y(x) = {\text Tr}(\rho_y(x)) $$ where $\rho_y : G \rightarrow GL(V_y)$ is the irreducible representation indiced by $y$. Furthermore, each irreducible representation is of dimension one as $G$ is abelian.
+%
+Thus, for $y \in \hat{G}$ and $r,q \in G$, $\rho_{q+r} = \rho_q\rho_r$ will simply be a multiplication of scalars and
+\begin{equation}
+  \label{abelianscale}
+  \chi_y(r + q) = \chi_y(r)\chi_y(q)
+\end{equation}
+%
+Recall that the HSP involves a function $f: G \rightarrow S$ to some finite set such that
+%
+$$ f(x) = f(y) \text{ iff } x^{-1}y \in H \quad \forall x,y \in G$$ for some hidden subgroup $H$. We use a similar idea found in Shor's algorithm to ascertain generators of $H$ with high probability.
+%
+
+Take a uniform superposition over $G$ and apply the action of our function on the state
+%
+\begin{equation}
+  \frac{1}{\sqrt{G}}\sum_{x \in G} \ket{x} \xrightarrow{f} \frac{1}{\sqrt{G}}\sum_{x \in G} \ket{x, f(x)}
+\end{equation}
+By measuring on the second register, we collapse the state to a uniform superposition over elements of a left coset $x + H$:
+%
+\begin{equation}
+  \ket{x + H} = \frac{1}{\sqrt{H}} \sum_{h \in G} \ket{x + h}
+\end{equation}
+%
+for some $x \in G$. This is deemed as a \textit{coset state of $H$}. Since we sample for this coset over the uniform superpostion, we have the mixed state
+%
+\begin{equation}
+  \label{cosetmixedstate}
+  \rho = \frac{1}{|G|} \sum_{x \in G} \ket{x + H}\bra{x + H}
+\end{equation}
+%
+Now apply the QFT transform over $G$ to this state
+\begin{equation}
+  \begin{split}
+    \widehat{\ket{x + H}}
+    & = F_G\ket{x + H} \\
+    & = \frac{1}{\sqrt{|G||H|}} \sum_{y \in \hat{G}} \sum_{h \in H} \chi_y(x + h) \ket{y} \\
+    & = \sqrt{\frac{|H|}{|G|}}\sum_{y \in \hat{G}}\chi_y(x)\big[ \frac{1}{|H|} \sum_{h \in H} \chi_y(h)\big]\ket{y} \\
+    & = \sqrt{\frac{|H|}{|G|}}\sum_{y \in \hat{G}}\chi_y(x)\chi_y(H)\ket{y}
+  \end{split}
+\end{equation}
+where
+$\chi_y(H) = \frac{1}{|H|} \sum_{h \in H} \chi_y(h)$.
+%
+Note that $\chi_y(x+h)$ separates into factors $\chi_y(x)\chi_y(h)$ by (\ref{abelianscale}).
+%
+By orthogonality relations between irreducible characters, we know orthogonality
+$$ \frac{1}{|H|}\sum_{h \in H} \chi_y(h) = \frac{1}{|H|}\sum_{h \in H} \chi_y(h) \chi_{y'}(h) = \delta_{y,y'}$$
+where we take $y'$ to be the trivial representation of $H$. Thus, we can express the form above as
+%
+\begin{equation}
+  \widehat{\ket{x + H}} = \sqrt{\frac{|H|}{|G|}} \sum_{\substack{y \in \hat{G} \\ \chi_y(H) = 1}}
+  \chi_y(x) \ket{y}
+\end{equation}
+%
+By the mixed state in (\ref{cosetmixedstate}), our mixed state after applying the QFT will be
+%
+\begin{equation}
+  \begin{split}
+      \hat{\rho} = \frac{1}{|G|}\sum_{x \in G} \widehat{\ket{x + H}} \widehat{\bra{x + H}} & = \frac{|H|}{|G|^2}  \sum_{\substack{\chi_y(H) = 1 \\ \chi_{r}(H) = 1}} \sum_{x \in G} \chi_y(x)\chi_r(x)^* \ket{y}\bra{r} \\
+      & = \frac{|H|}{|G|} \sum_{\chi_y(H) = 1} \ket{y}\bra{y}
+  \end{split}
+\end{equation}
+The last equality follows once again from the orthogonality relations between irreducible characters.
+%
+The state $\hat{\rho}$ suggests that it is a classical uniform distribution over the characters taking value one on $H$. Thus, measuring on this state will yield such a character. The method which will progressively crave out $H$ will be to take intersections of the sets of $G$ which are trivial on the $\chi_y$:
+$$ C_{y} = \{ x \in G \mid \chi_y(x) = 1 \} $$
+$C_{y}$ can be seen as the kernel of $\chi_y$ which makes sense as  $\chi_y: G \rightarrow \mathbb{C}^\times$ is a group homomorphism in this particular case.
+\end{document}

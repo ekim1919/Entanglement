@@ -1,0 +1,99 @@
+\documentclass{../quantum.tex}
+
+\begin{document}
+\section{Quantum Mechanics}
+
+\subsection{Postulates of Quantum Mechanics}
+
+\subsection{Density Matrices}
+
+Suppose we have an ensemble of states $\{\ket{\psi_1},...,\ket{\psi_k}\}$ in a statisitcal mixture in the sense that we know the distribution of the states. Let $p_i$ denote the probability of selecting state $\ket{\psi_i}$ for $1 \leq i \leq k$ where $\sum_i p_i = 1$.
+
+We wish to find a way to calculate the expected value of any observable $A$ on this ensemble. Note that the linear superposition of these states in the form $\sum_{i=1}^k p_i \ket{\psi_i}$ is generally not the same as a statistical mixture of the individual states $\ket{\psi_i}$.
+
+From Postulate three, we can calculate the probability that measuring with $A = \sum_i a_iP_i$ will yield outcome $a_j$:
+
+$$ p(j) = \sum_{i=1}^k p_i \bra{\psi_i}P_j\ket{\psi_i} $$
+
+Note that the $\bra{\psi_i}P_j\ket{\psi_i}$ represent the probability of obtaining outcome $a_j$ given the state vector is $\ket{\psi_i}$ as per postulate three. Thus, our expected value for the observable $A$ would objects:
+$$ \langle A \rangle = \sum_{j=1}^n a_j p(j) = \sum_{j=1}^n a_i (\sum_{i=1}^k p_i \bra{\psi_i}P_j\ket{\psi_i}) = \sum_{i=1}^k p_i \bra{\psi_i}\sum_{i=1}^n a_j P_j\ket{\psi_i} = \sum_{i=1}^kp_i \bra{\psi_i}A\ket{\psi_i} $$
+
+Define the {\bf density matrix} of the ensemble to be
+$$ \rho = \sum_{i=1}^k p_i \ket{\psi_i}\bra{\psi_i} $$
+
+and $\langle A \rangle = Tr(\rho A)$. We verify this as follows:
+
+\begin{gather}
+ Tr(\rho A) = \sum_{j=1}^n \bra{j}\rho A \ket{j} = \sum_{j=1}^n \bra{j} (\sum_{i=1}^k p_i\ket{\psi_i} \bra{\psi_i})A\ket{j} = \sum_{j=1}^n \sum_{i=1}^k p_i \bra{j}\ket{\psi_i}\bra{\psi_i}A\ket{j} = \\
+ \sum_{i=1}^k p_i\bra{\psi_i}A(\sum_{j=1}^n \ket{j}\bra{j}) \ket{\psi_i} = \sum_{i=1}^k p_i \bra{\psi_i}A\ket{\psi_i} = \langle A \rangle
+\end{gather}
+where the next-to-last equality stems from the completeness criterion: $\sum_i \ket{i}\bra{i} = I$. Thus, we have a method to describe expectation and probabilities in terms of operators rather than state vectors. Note that a pure state can be trivially described through the density matrix formalulation by $\rho = \ket{\psi}\bra{\psi}$.
+
+The density matrix has the following properties: Let $\{\ket{i}\}$ denote an orthogonal basis of our Hilbert space $\mathcal{H}$:
+
+\begin{enumerate}
+  \item {\bf $\rho$ is Hermitian}: Let
+  $$ \rho_{ij} = \bra{i}\rho\ket{j} = \sum_{m=1}^k p_m \bra{i}\ket{\psi_m} \bra{\psi_m}\ket{j} = \sum_{m=1}^k p_m c_i^{(m)} (c_j^{(m)})^*$$ Thus,
+  $$ \rho_{ji}^* = \sum_{m=1}^k p_m (c_j^{(m)})^* c_i^{(m)} = \rho_{ij}  $$
+  \item {\bf $\rho$ has unit trace} By our formula above:
+  $$ Tr(\rho) = \sum_{i=1}^n \rho_{ii} = \sum_{i=1}^n\sum_{m=1}^k p_m c_{i}^{(m)}(c_{i}^{(m)})^* = \sum_{m=1}^k p_m \sum_{i=1}^n|c_i^{(m)}|^2 =
+  \sum_{m=1}^k p_m = 1
+  $$
+  \item {\bf $\rho$ is non-negative}: Let $\ket{\phi} \in \mathcal{H}$. It suffices to prove that $\bra{\phi}\rho\ket{\phi} \geq 0$.
+\end{enumerate}
+
+Fromm property one above, we derive the following criteria for determining if a given density matrix $\rho$ represents a mixed state or a pure state:
+
+\begin{theorem}
+  Given density matrix $\rho$, $Tr(\rho^2) = 1$ iff $\rho$ represents a pure state. On the other hand, $Tr(\rho^2) < 1$ iff $\rho$ represents a mixed state.
+\end{theorem}
+
+\begin{proof}
+
+\end{proof}
+
+\subsubsection{How to prepare $\rho$}
+Suppose we have an ensemble of the form $\{p(i),\ket{\psi_i}\}$ where $p$ refers to a distribution of probabilities over the indices $\{i\}$. We can classically prepare such a state by tossing a biased die obeying the distribution above, and preparing the corresponding state based on the outcome.
+
+\subsection{Composite Systems}
+
+We can use the density matrix formalism to express statistical measurements in subsystems in the following sense:
+
+Let $\mathcal{H} = \mathcal{H}_1 \otimes \mathcal{H}_2$ be the \textit{bipartite} separable system consisting of two subsystems expressed as Hilbert spaces $\mathcal{H}_1,\mathcal{H}_2$. By definition of the tensor product if $\ket{\psi} \in \mathcal{H}$, $\ket{\psi}$ has the form:
+$$ \ket{\psi} = \sum_{i,\alpha} c_{i}c_{\alpha} \ket{i}\otimes\ket{\alpha} =  \sum_{i,\alpha} c_{i,\alpha} \ket{i}\otimes\ket{\alpha}$$
+if we let $\{\ket{i}\},\{\ket{\alpha}\}$ be sets of orthogonal basis vectors in $\mathcal{H}_1,\mathcal{H}_2$ respectively.
+
+By our definiton in the previous section, the density matrix for our pure state $\ket{\psi}$ will be:
+
+$$ \rho = \ket{\psi}\bra{\psi} = \sum_{i,\alpha}\sum_{j,\beta} c_{i,\alpha}(c_{j,\beta})^*\ket{i}\ket{\alpha}\bra{j}\bra{\beta} = \sum_{(i,j),(\alpha,\beta)} \lambda_{(i,j),(\alpha,\beta)} \ket{i}\bra{j}\otimes \ket{\alpha}\bra{\beta}$$
+
+Suppose we have an observable $A_1$ for subsystem $\mathcal{H}_1$, and we wish to find $\langle A_1 \rangle$ given $\mathcal{H}$. Let $A_1 \otimes I_2: \mathcal{H} \rightarrow \mathcal{H}$ be the unique linear map induced by $A_1:\mathcal{H}_1 \rightarrow \mathcal{H}_1$ and $I_2: \mathcal{H}_2 \rightarrow \mathcal{H}_2$.
+
+\begin{gather}
+  \langle A_1 \otimes I_2 \rangle = Tr(\rho(A_1 \otimes I_2)) = \sum_{i,\alpha} \bra{i}\bra{\alpha}\rho(A_1 \otimes I_2) \ket{i}\ket{\alpha} = \\
+  \sum_{i,\alpha} \bra{i}\bra{\alpha}[
+  \sum_{(k,l),(\beta,\gamma)} \lambda_{(k,l),(\beta,\gamma)} \ket{k}\bra{l}\otimes \ket{\beta}\bra{\gamma}]
+  )(A_1 \otimes I_2)\ket{i}\ket{\alpha} = \\
+  \sum_{i} \bra{i} \sum_{\alpha} \bra{\alpha}(\sum_{(k,l),(\beta,\gamma)}
+   \lambda_{(k,l),(\beta,\gamma)} \ket{k}\bra{l}\otimes \ket{\beta}\bra{\gamma})\ket{\alpha} A_i \ket{i} = \sum_{i} \bra{i} = \\ Tr_2(\rho)A_i \ket{i} = Tr(A_iTr_b(\rho))
+\end{gather}
+
+where $$ \rho_1= Tr_2(\rho) = \sum_{\alpha} \bra{\alpha} \rho \ket{\alpha} $$ is the \textit{partial trace} of density operator $\rho$. Note that these equalties follow directly from the bilinear property of the tensor product on Hilbert spaces $\mathcal{H}_1,\mathcal{H}_2$.
+
+Similarly, for $\mathcal{H}_1$:
+$$\rho_2 = Tr_1(\rho) = \sum_{i} \bra{i}\rho\ket{i} $$
+
+It can be directly checked that $\rho_m$ for $m = 1,2$ is indeed a density operator in that it is a Hermitian semi-definite operator with unit trace. We refer to the $\rho_m$ as \textit{local density operators} as they refer to density operators in respect to the individual subsystems.
+
+The local density operators above can be seen as the quantim analogue of the marginal distribution defined in classical probability theory i.e if $p_{X,Y}(x,y)$ is a joint probability distribution over random variables $X,Y$, then the marginal distribution for $X$ is
+$p_X(x) = \sum_{y} p_{X,Y}(x,y)$
+
+
+\subsection{Separable States}
+
+
+
+
+
+
+\end{document}

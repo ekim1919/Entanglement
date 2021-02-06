@@ -1,0 +1,34 @@
+\documentclass[12pt]{article}
+\setlength{\oddsidemargin}{0in}
+\setlength{\evensidemargin}{0in}
+\setlength{\textwidth}{6.5in}
+\setlength{\parindent}{0cm}
+\setlength{\parskip}{\baselineskip}
+
+\usepackage{amsmath,amsfonts,amssymb,amsthm}
+\usepackage{physics}
+\usepackage{qcircuit}
+\usepackage{subfiles,import}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{remark}{Remark}
+\def\biblio{\bibliographystyle{amsalpha}\bibliography{biblo}}
+
+\title{\vspace{-7ex}Notes on Quantum Information Processing \vspace{-2ex}}
+\author{Edward Kim}
+\date{\vspace{-2ex}\today}
+\begin{document}
+\maketitle
+
+\subfile{sections/quantmech}
+\subfile{sections/qubit}
+\subfile{sections/gates}
+\subfile{sections/algorithms}
+\subfile{sections/hsp}
+\subfile{sections/fourier}
+
+\bibstyle{amsalpha}
+\bibliography{biblo}
+
+\end{document}

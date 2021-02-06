@@ -1,0 +1,29 @@
+\documentclass{../quantum.tex}
+
+\begin{document}
+\section{Fourier Analysis over Nonabelian Finite Groups}
+
+Let $G$ be a finite group (non necessarily abelian).
+Let $\mathbb{C}[G]$ the \textit{group algebra} of $G$ over $\mathbb{C}$ i.e the $\mathbb{C}$-algebra with elements of the form:
+$$ f = \sum_g a_g \cdot g $$ with addition done with the group elements as indices and multiplication adhering to the binary operation on $G$. The general \textit{Fourier Transform over $G$} is a unitary transformation $F_G: \mathbb{C}[G] \rightarrow \bigoplus_{y \in \hat{G}} \mathbb{C}^{n_y} \otimes \mathbb{C}^{n_y}$ with following action on basis vectors $x \in G$
+%
+\begin{equation}
+  \ket{\hat{x}} = F_G\ket{x} = \frac{1}{\sqrt{|G|}}\sum_{y \in \hat{G}} n_y \ket{y, \rho_y(x)}
+\end{equation}
+where $\hat{G}$ indices of the set of irreducible representation of $G$, $n_i$ is the dimension of the $i^{th}$ irreducible representation, and
+\begin{equation}
+  \ket{\rho_y(x)} = \sum_{1 \leq q,r \leq n_y} \frac{\rho_y(x)_{q,r}}{\sqrt{n_y}} \ket{q} \otimes \ket{r}
+\end{equation}
+%
+By summing over all such basis vectors, we get the operator
+$$ F_G = \sum_{x \in G} \ket{\hat{x}}\bra{x} $$
+%
+Observe we arrive at the form encountered in the previous section when we assume $G$ is abelian as $\chi_y(x) = \text{Tr}(\rho_y(x)) = \rho_y(x)_{1,1} = \lambda_y \in \mathbb{C}$. Thus, $\ket{\rho_y(x)} = \lambda_y$ so simplifying will yield the desired form (\ref{abelQFT}).
+%
+Finally, $F_G$ is verified to be a unitary transformation as
+\begin{gather}
+  \bra{\hat{z}}\ket{\hat{y}}
+\end{gather}
+
+
+\end{document}
