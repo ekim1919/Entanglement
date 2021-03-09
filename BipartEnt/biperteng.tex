@@ -1,0 +1,196 @@
+\documentclass[12pt]{article}
+\setlength{\oddsidemargin}{0in}
+\setlength{\evensidemargin}{0in}
+\setlength{\textwidth}{6.5in}
+\setlength{\parindent}{0cm}
+\setlength{\parskip}{\baselineskip}
+
+\usepackage{amsmath,amsfonts,amssymb,amsthm}
+\usepackage{physics}
+\usepackage{qcircuit}
+\usepackage{tcolorbox}
+\usepackage{subfiles,import}
+
+\newcommand{\X}{\mathcal{X}}
+\newcommand{\Y}{\mathcal{Y}}
+\newcommand{\Z}{\mathcal{Z}}
+\newcommand{\LX}{\mathcal{L}(\mathcal{X})}
+\newcommand{\LY}{\mathcal{L}(\mathcal{Y})}
+\newcommand{\LZ}{\mathcal{L}(\mathcal{Z})}
+\newcommand{\PSDX}{\mathcal{PSD}(X)}
+\newcommand{\DX}{\mathcal{D}(\mathcal{X})}
+\newcommand{\DY}{\mathcal{D}(\mathcal{Y})}
+\newtheorem{definition}{Definition}
+\newtheorem{theorem}{Theorem}
+\newtheorem{proposition}{Proposition}
+\newtheorem{lemma}{Lemma}
+
+
+\begin{document}
+
+\title{Bipartite Entanglement}
+\author{Edward Kim}
+\date{\today}
+\maketitle
+
+We first annonate some proofs and arguments from Watrous as exercises, borrowing heavily from his notation.
+
+\section{Separability}
+We start with the definition of separable operators. Throughout this section, let $\X,\Y$ be finite-dimensional complex Hilbert spaces with $\mathcal{L}(\mathcal{X}), \mathcal{L}(\mathcal{Y})$ the spaces of linear operators for $\mathcal{X},\mathcal{Y}$ respectively.
+\begin{definition}
+Let $P \in \mathcal{PSD}(\X \otimes \Y)$ be a positive semi-definite operator. $P$ is a \emph{separable operator} if there exists a family of operators $\{X_a \mid a \in \Sigma \} \subset \LX$ and $\{Y_a \mid a \in \Sigma \} \subset \LY$ and an indexing alphabet $\Sigma$ such that
+\[
+P = \sum_{a \in \Sigma} X_a \otimes Y_a
+\]
+\end{definition}
+Denote the set of all such separable operators over $\X \otimes \Y$ as $Sep(\X:\Y)$.
+It's simple to see that $Sep(\X:\Y)$ is a convex set by observing that if $P_0, P_1 \in Sep(\X : \Y)$, then $P_0 + P_1 \in Sep(\X: \Y)$. Similarly if $\lambda > 0$ is a real number, then $\lambda P_0 \in Sep(\X : \Y)$. Thus, for $\lambda \in [0,1]$
+\[
+\lambda P_0 + (1-\lambda)P_1 \in Sep(\X : \Y)
+\]
+showing convexity as desired.
+
+There are several methods to express \emph{separable states} i.e members of $SepD(X : Y) = Sep(X:Y) \cap \mathcal{D}(\X \otimes \Y)$ as the following theorem states:
+\begin{theorem}
+  Let $\rho \in \mathcal{D}(\X \otimes \Y)$ be an arbitrary state. The following statements are equivalent:
+  \begin{enumerate}
+    \item $\rho \in SepD(X : Y)$
+    \item There exists collections of states $\{\alpha_a \mid a \in \Sigma\} \subset \DX$, $\{\beta_a \mid a \in \Sigma\} \subset \DY$ such that
+    \[
+      \rho = \sum_{a \in \Sigma} p(a) \alpha_a \otimes \beta_a
+    \]
+    where $\Sigma$ is an indexing alphabet and $p$ is a probability distribution across $\Sigma$.
+    \item There exists collections of unit vectors $\{x_a \mid a \in \Sigma\} \subset \X$, $\{y_a \mid a \in \Sigma\} \subset \Y$ such that
+    \[
+    \rho = \sum_{a \in \Sigma} p(a) x_ax_a^* \otimes y_ay_a^*
+    \]
+    where $\Sigma$ is an indexing alphabet and $p$ is a probability distribution across $\Sigma$.
+  \end{enumerate}
+\end{theorem}
+
+The Peres-Horodecki Criteron provides a useful criteron for determining the separability of operators:
+\begin{theorem}{(Peres-Horodecki)}
+ Let $P \in \mathcal{PSD}(\X \otimes \Y)$ be a positive semi-definite operator. Then the following statements are equivalent:
+ \begin{enumerate}
+   \item $P \in Sep(\X:\Y)$
+   \item For every choice of complex finite-dimensional Hilbert space $\mathcal{Z}$ and positive map $\Phi:\mathcal{L}(\LX, \LZ)$,
+         $$ (\Phi \otimes \mathbb{I}_{\LY})(P) \in \mathcal{PSD}(\Z \otimes \Y) $$
+  \item  For every choice of complex finite-dimensional Hilbert space $\mathcal{Z}$ and positive, unital map $\Phi:\mathcal{L}(\LX, \LZ)$,
+        $$ (\Phi \otimes \mathbb{I}_{\LY})(P) \in \mathcal{PSD}(\Z \otimes \Y) $$
+ \end{enumerate}
+\end{theorem}
+
+\section{PPT States}
+ Consider the transponse map $T: \mathcal{L}(\mathcal{L}(\mathcal{X}), \mathcal{L}(\mathcal{Y}))$ with the following action:
+\[
+T(X) = X^{\intercal}, \quad X \in \LX
+\]
+
+As transposing does not alter the spectrum of $X$, $T$ is a positive map. An important class of states are called the \emph{PPT states} which have the following property: consider $\mathcal{PSD}(X \otimes Y)$ to be the set of all positive semi-definite operators on $\X \otimes \Y$. We say that $P \in \mathcal{PSD}(\X \otimes \Y)$ is PPT if
+\[
+(T \otimes \mathbb{I}_\Y)(P) \in \mathcal{PSD}(\X \otimes Y)
+\]
+In other words, taking the partial transponse in respect to $\X$ preserves the positive semi-definiteness of $P$. Denote the set of all PPT operators as $PPT(\X : \Y)$. We can naturally extend this to states by taking the intersection $PPT(\X : \Y) \cap \mathcal{D}(\X \otimes \Y)$. We will first demonstrate a method of constructing PPT operators which are not separable.
+
+\begin{definition}
+  An \emph{unextendible product base} is defined by two sets of unit vectors
+  \[ \{u_a \mid  u_a \in \X, a \in \Sigma\}, \{v_a \mid v_a \in \Y, a \in \Sigma\} \]
+  indexed by alphabet $\Sigma$ such that the following hold:
+  \begin{enumerate}
+    \item The $u_a \otimes v_a$ are pairwise orthogonal
+    \item $\mathcal{V} = \sum_{a \in \Sigma} u_a \otimes v_a$ forms a \emph{proper} subspace of $\X \otimes \Y$
+    \item If $r \in \X, \ell \in \Y$ and $(r \otimes \ell) \perp \mathcal{V}$, then $r \otimes \ell = 0$.
+  \end{enumerate}
+\end{definition}
+
+\begin{tcolorbox}
+  Exercise. In Example 6.40 of Watrous details a construction of an unextendible product base for $\mathbb{C}^3 \otimes \mathbb{C}^3$. Use a similar technique to construct UPBs for higher dimensions.
+\end{tcolorbox}
+
+\begin{theorem}
+Let $\{u_1 \otimes v_1, u_2 \otimes v_2, \cdots, u_m \otimes v_m \}$ be an unextendable product base for $\X \otimes \Y$ with $\mathcal{V} = \sum_{r=1}^m u_a \otimes v_a$ its associated subspace. Let
+\[
+\Pi = \sum_{r=1}^m u_ru_r^* \otimes v_rv_r^*
+\]
+be the projection matrix on $\mathcal{V}$. Then
+\[
+I_{\X} \otimes I_{\Y} - \Pi \in PPT(X : Y) \backslash Sep(X:Y)
+\]
+\end{theorem}
+
+\begin{proof}
+  Observe first that
+  \[ (T \otimes I_{\LY})(\Pi) = \sum_{r = 1}^m \overline{u_a}u_a^\intercal \otimes v_rv_r^* \]
+  is another projection matrix by computing $\left( T \otimes I_{\LY})(\Pi) \right)^2 = (T \otimes I_{\LY})(\Pi)$. Hence, $$(T \otimes I_{\LY})(\Pi) \leq I_{\LX} \otimes I_{\LY}$$ since $I_{\LX} \otimes I_{\LY} - (T \otimes I_{\LY})(\Pi) \in \mathcal{PSD}(\X \otimes \Y)$. Since the partial tranpose map fixes the identity, we reexpress the inequality above as:
+  \begin{equation}
+    (T \otimes I_{\LY})(I_{\LX} \otimes I_{\LY} - \Pi) \in \mathcal{PSD}(\X \otimes \Y)
+  \end{equation}
+  Since $I_{\LX} \otimes I_{\LY} - \Pi \in \mathcal{PSD}(\X \otimes \Y)$, it immediately follows that $I_{\LX} \otimes I_{\LY} - \Pi$ must be contained in $PT(\X : \Y)$.
+
+  To show separability, we argue through contradiction. To this end, suppose $I_{\LX} \otimes I_{\LY} - \Pi$ is separable. By definition, this shows that we can deduce the equality:
+
+  \begin{equation} \label{theo2separa}
+  I_{\LX} \otimes I_{\LY} - \sum_{r=1}^m u_ru_r^* \otimes v_rv_r^* = \sum_{a \in \Sigma} x_ax_a^* \otimes y_ay_a^*
+  \end{equation}
+
+  for some indexing alphabet $\Sigma$ and unit vectors $x_a \in \X, y_a \in \Y$ for all $a\in\Sigma$.
+  Multiplying both sides as follows to show that
+  \[
+  \sum_{r=1}^m (u_r \otimes v_r)^* (I_{\LX} \otimes I_{\LY} - \Pi)(u_r \otimes v_r) = \sum_{r=1}^m\sum_{a\in\Sigma} |\langle u_r \otimes v_r, x_a \otimes y_a \rangle|^2
+  \]
+  The left side will trivially be zero by definition of $\Pi$, leaving the right-hand side to vanish:
+  \[
+   \sum_{r=1}^m\sum_{a\in\Sigma} |\langle u_r \otimes v_r, x_a \otimes y_a \rangle|^2 = 0
+  \]
+  Since the sum of nonnegative reals vanish, it must be that
+  \begin{equation} \label{theo2ortho}
+     \langle u_r \otimes v_r, x_a \otimes y_a \rangle = 0
+  \end{equation}
+  for all $r \in [m]$ and $a \in \Sigma$
+
+  Set $\mathcal{H} = \sum_{a \in \Sigma} x_a \otimes y_a$. By (\ref{theo2ortho}) above, $\mathcal{H}$ forms a complementary orthogonal subspace to $\mathcal{V}$. Since $\mathcal{V}$ is unextendible, $\mathcal{H} = 0$. In particular, $x_a \otimes y_a = 0$ for all $a \in \Sigma$. Substituting this into (\ref{theo2separa}) yields that
+  $$ \Pi = \mathbb{I}_\X \otimes \mathbb{I}_\Y $$ which contradicts the proper containment of $\mathcal{V}$.
+\end{proof}
+
+Now that we have shown that there exist entangled PPT states, we can show that these states are still close to separable states in the sense that PPT states have no distillable entanglement. Let us start with a proposition which suggests that PPT states far away from maximally entangled states in terms of their fidelity:
+
+\begin{proposition}
+  Let $A \in \mathcal{L}(\Y, \X)$ be an operator such that $||A|| \leq 1$. Let $P \in PPT(X:Y)$. Then the following inequality must hold:
+  \begin{equation}
+    \langle vec(A)vec(A)^* , P \rangle \leq Tr(P)
+  \end{equation}
+\end{proposition}
+
+\begin{proof}
+It is simple to show that the tranpose map is its own adjoint and inverse. Using this fact, it must hold that
+\begin{align}
+\langle vec(A)vec(A)^*, P \rangle & = \langle vec(A)vec(A)^*, (T \otimes I_{\LY})(T \otimes I_{\LY})(P) \rangle \\
+                                  & = \langle (T \otimes I_{\LY})vec(A)vec(A)^*, (T \otimes I_{\LY})(P) \rangle
+\end{align}
+Recall the vectorization identity
+\[
+vec(ABC^\intercal) = (A \otimes C)vec(B)
+\]
+for any operators $A,B,C \in \mathcal{L}(\Y, \X)$. Manipulating this identity for our case shows that
+\[
+vec(A)vec(A)^* = (I_\X \otimes A^\intercal)vec(I_\X)vec(I_\X)^* (I_\X \otimes \overline{A})
+\]
+Through a direct calculation, we deduce that
+\begin{align}
+(T \otimes I_{\LY})(vec(A)vec(A)^*)  & = (I_\X \otimes A^\intercal)(T \otimes I_{\LX })(vec(I_\X)vec(I_\X)^*)(I_\X \otimes \overline{A}) \\
+                                    & = (I_\X \otimes A^\intercal)\mathcal{F}(I_\X \otimes \overline{A})
+\end{align}
+where $\mathcal{F}: \X \otimes \X \rightarrow \X \otimes \X$ is the swap operator. Since $\mathcal{F}$ is unitary, $||F|| \leq 1$. Combining this with the assumption that $||A|| \leq 1$ shows that:
+\[ ||(T \otimes I_{\LY})(vec(A)vec(A)^*)|| \leq ||(I_\X \otimes A^\intercal)||\cdot||\mathcal{F}||\cdot ||(I_\X \otimes \overline{A})|| \leq 1 \]
+By Holder inequality for Schatten norms,
+$(|\langle B, A \rangle| \leq ||B||_p||A||_{p^*})$ for $p,p^* \in [1,\infty]$ dual to each other)
+\begin{align*}
+\langle (T \otimes I_{\LY})vec(A)vec(A)^*, (T \otimes I_{\LY})(P) \rangle & \leq ||(T \otimes I_{\LY})vec(A)vec(A)^*||\cdot||(T \otimes I_{\LY})(P)||_1 \\
+                                                                          & \leq ||(T \otimes I_{\LY})(P)||_1
+\end{align*}
+
+The final step simply recognizes that $||(T \otimes I_{\LY})(P)||_1 = Tr(P)$ since $P \in \mathcal{PSD}(\X \otimes \Y)$ and transpose preserves the trace of $P$. By finally combining this with the above observations, we get the desired inequality.
+
+\end{proof}
+
+\end{document}
