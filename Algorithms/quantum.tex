@@ -8,27 +8,21 @@
 \usepackage{amsmath,amsfonts,amssymb,amsthm}
 \usepackage{physics}
 \usepackage{qcircuit}
-\usepackage{subfiles,import}
 
 \newtheorem{theorem}{Theorem}
 \newtheorem{lemma}{Lemma}
 \newtheorem{remark}{Remark}
-\def\biblio{\bibliographystyle{amsalpha}\bibliography{biblo}}
 
-\title{\vspace{-7ex}Notes on Quantum Information Processing \vspace{-2ex}}
+\title{\vspace{-7ex}Notes on Quantum Algorithms \vspace{-2ex}}
 \author{Edward Kim}
 \date{\vspace{-2ex}\today}
 \begin{document}
 \maketitle
 
-\subfile{sections/quantmech}
-\subfile{sections/qubit}
-\subfile{sections/gates}
-\subfile{sections/algorithms}
-\subfile{sections/hsp}
-\subfile{sections/fourier}
+\input{algorithms}
+\input{hsp}
+\input{fourier}
 
-\bibstyle{amsalpha}
 \bibliography{biblo}
 
 \end{document}

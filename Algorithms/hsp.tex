@@ -1,6 +1,3 @@
-\documentclass{../quantum.tex}
-
-\begin{document}
 \section{The Hidden Subgroup Problem and its Applications}
 
 The Hidden Subgroup Problem (HSP) can be phrased by first introducing the following oracle:
@@ -10,11 +7,13 @@ Suppose I have a finite group $G$ along with a function $f: G \rightarrow S$ wit
 %
 $$ f(x) = f(y) \text{ iff } x^{-1}y \in H $$
 
-We wish to determine $H$ through a generator representation by quering the oracle preferrably as little as needed. Determining such a subgroup is important in studying Quantum algorithms to algebraic problems. This section will focus on one such application where this problem naturally appears: {\bf Shor's Algorithm} for finding the discrete logarithm.
+We wish to determine $H$ through a generator representation by quering the oracle preferrably as little as needed. Determining such a subgroup is important in studying Quantum algorithms to algebraic problems. This section will focus on one such application where this problem naturally appears: \emph{Shor's Algorithm} for finding the discrete logarithm.
 %
+\subsection{Shor's Algorithm: Period Finding}
+We first develop some intuition through a simpler scenario where we know the period of a periodic function $f: \mathbb{Z} \rightarrow \mathbb{Z}_M$ for some sufficiently large $M$.
 
 \subsection{Shor's Algorithm: Discrete Logarithm}
-First, we set the stage. Suppose that I have a finite cyclic group $G = \langle g \rangle$. To simplify the presentation, let us assume that the order of $G$ is known beforehand. In general, we do not know the period of an arbitrary cyclic group. Furthermore, let us assume that $x \neq g$ as this can be checked in constant time.
+First, we set the stage. Suppose that we have a finite cyclic group $G = \langle g \rangle$. To simplify the presentation, let us assume that the order of $G$ is known beforehand. In general, we do not know the period of an arbitrary cyclic group. Furthermore, let us assume that $x \neq g$ as this can be checked in constant time.
 %
 
 Now we define a function $f: \mathbb{Z}_N \times \mathbb{Z}_N \rightarrow G$:
@@ -76,9 +75,6 @@ By measuring this state, we will receive one of the $(\theta\log_g{x}, \theta)$ 
 \begin{remark}
   The QFT transform above roughly transfers the information encoded into the states to the phases. By the identity above, certain phases will engage in destructive interference, leaving the useful information to be measured. This technique is known as {\bf Fourier Sampling}. We will touch Fourier Sampling in an upcoming section.
 \end{remark}
-
-\subsection{Shor's Algorithm: Period Finding}
-A similar vein of thought can be applied to the Period Finding Problem.
 
 \subsection{On the Abelian HSP}
 
@@ -147,15 +143,33 @@ where we take $y'$ to be the trivial representation of $H$. Thus, we can express
 %
 By the mixed state in (\ref{cosetmixedstate}), our mixed state after applying the QFT will be
 %
-\begin{equation}
+\begin{equation} \label{AHSPDiag}
   \begin{split}
       \hat{\rho} = \frac{1}{|G|}\sum_{x \in G} \widehat{\ket{x + H}} \widehat{\bra{x + H}} & = \frac{|H|}{|G|^2}  \sum_{\substack{\chi_y(H) = 1 \\ \chi_{r}(H) = 1}} \sum_{x \in G} \chi_y(x)\chi_r(x)^* \ket{y}\bra{r} \\
       & = \frac{|H|}{|G|} \sum_{\chi_y(H) = 1} \ket{y}\bra{y}
   \end{split}
 \end{equation}
-The last equality follows once again from the orthogonality relations between irreducible characters.
+The last equality follows once again from the orthogonality relations between irreducible characters. Observe that $\hat{\rho}$ is expressed as a diagonal matrix, such that the non-zero entries correspond to characters of $G$ which are trivial over $H$.
 %
-The state $\hat{\rho}$ suggests that it is a classical uniform distribution over the characters taking value one on $H$. Thus, measuring on this state will yield such a character. The method which will progressively crave out $H$ will be to take intersections of the sets of $G$ which are trivial on the $\chi_y$:
-$$ C_{y} = \{ x \in G \mid \chi_y(x) = 1 \} $$
-$C_{y}$ can be seen as the kernel of $\chi_y$ which makes sense as  $\chi_y: G \rightarrow \mathbb{C}^\times$ is a group homomorphism in this particular case.
-\end{document}
+The state $\hat{\rho}$ suggests that it is a classical uniform distribution over the characters taking value one on $H$. Thus, measuring on this state over the computational basis will yield such a character. The method which will progressively carve out $H$ will be to take intersections of the sets of $G$ which are trivial on the $\chi_y$:
+$$ \ker{\chi_{y}} = \{ x \in G \mid \chi_y(x) = 1 \} $$
+Indeed, the kernel of $\chi_y$ is exactly above, which makes sense as  $\chi_y: G \rightarrow \mathbb{C}^\times$ is a group homomorphism. From \ref{AHSPDiag}}, it's evident that $H < \ker{\chi_y}$ for all such $\chi_y(H) = 1$. Thus, $H$ is contained in the intersection of all such $\chi_y$. What is left to show is that the previous process of preparing the mixed state $\hat{\rho}$, measuring the state, and taking the intersection of kernel of the measured character with the accumlated intersection will eventually lead to the determination of $H$ quickly.
+%
+Begin by assuming that our total intersection is some subgroup $H < K$. We wish to show that with high probability, we can shave off a factor of $|K|$. From the derivation above, we see that there are exactly $|G|/|H|$ $y$s such that $\chi_y(H) = 1$. Since each character has uniform probablity,
+$$ {\bf Pr}_{y \sim \hat{G}}[\chi_y(H) = 1]  = \frac{|H|}{|G|}$$
+%
+Now, we calculate the probablity that $K \leq \ker{\chi_y}$:
+%
+\[ {\bf Pr}_{y \sim \hat{G}}[K \leq \ker{\chi_y}] = \frac{|H|}{|G|} |\{y \in \hat{G} \mid K \leq \ker{\chi_y}\}|\]
+%
+To calculate the rightmost factor, note that the derivation we performed above for $H$ can be imitated to show that $|\{y \in \hat{G} \mid K \leq \ker{\chi_y}\}| = \frac{|G|}{|K|}$
+%
+Hence,
+\[ {\bf Pr}_{y \sim \hat{G}}[K \leq \ker{\chi_y}] = \frac{|H|}{|K|} \leq \frac{1}{2}\]
+%
+The last inequality follows from Lagrange's Theorem: $|K| \geq 2|H|$. From this, we know that the probability
+${\bf Pr}_{y \sim \hat{G}}[K \not\leq \ker{\chi_y}] \geq \frac{1}{2}$. Furthermore, if we do sample such a $y \in \hat{G}$,
+\[ |\ker{\chi_y} \cap K| \leq \frac{|K|}{2} \]
+Thus, with $\mathcal{O}(\log{|G|})$ iterations, we can extract $H$ with high probablity.
+
+Note that in this algorithm, we assume that we have some explicit presentation of the $\chi_y$ on hand with which we can efficiently compute $\ker{\chi_y}$. We leave the remainder of the proof showing the procedure of applying this to an arbitrary abelian group in the next section.

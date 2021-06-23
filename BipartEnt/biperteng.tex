@@ -33,7 +33,7 @@
 \date{\today}
 \maketitle
 
-We first annonate some proofs and arguments from Watrous as exercises, borrowing heavily from his notation.
+We first annonate some proofs and arguments from Watrous as exercises, pillaging from his notation.
 
 \section{Separability}
 We start with the definition of separable operators. Throughout this section, let $\X,\Y$ be finite-dimensional complex Hilbert spaces with $\mathcal{L}(\mathcal{X}), \mathcal{L}(\mathcal{Y})$ the spaces of linear operators for $\mathcal{X},\mathcal{Y}$ respectively.
@@ -79,6 +79,37 @@ The Peres-Horodecki Criteron provides a useful criteron for determining the sepa
         $$ (\Phi \otimes \mathbb{I}_{\LY})(P) \in \mathcal{PSD}(\Z \otimes \Y) $$
  \end{enumerate}
 \end{theorem}
+
+\section{Werner States}
+We start with definitions to ensure the notes are self-contained. Define
+\begin{align*}
+& \Delta_0 = \frac{1}{n}\sum_{a, b \in \Sigma} E_{a,b} \otimes E_{a,b} \\
+& \Delta_1 = \mathbb{I}_\X \otimes \mathbb{I}_\Y - \Delta_0 \\
+& \Pi_0 = \Pi_{\wedge^n\X} = \frac{1}{2}(\mathbb{I}_\X \otimes \mathbb{I}_\Y + \mathcal{F}) \\
+& \Pi_1 = \mathbb{I}_\X \otimes \mathbb{I}_\Y - \Pi_0 = \Pi_{\vee^n\X} = \frac{1}{2}(\mathbb{I}_\X \otimes \mathbb{I}_\Y - \mathcal{F})
+\end{align*}
+
+\section{Nielsen's Theorem}
+One way we can understand entanglement is through classes of operations which preserve entanglement. To be specific, recall that LOCC \emph{(Local Operations with Classical Communication)} operations preserve entanglement as convex combinations of unitaries don't change the entanglement entropy of a state. This induces equivalence classes where members can transformed into each other through LOCC operations. Nielsen's Theorem provides insight into the exact criterion for determining membership of equivalence classes:
+
+\begin{definition}
+  Let $\rho, \gamma \in \DX$ be two states in $\X$. Let $\lambda_{\rho, i}, \lambda_{\gamma, i}$ be the spectra of $\rho, \gamma$ respectively ordered in non-decreasing order. We say that $\gamma$ majorizes $\rho$ ($\rho \prec \gamma$) iff
+  \[ \sum_{i=1}^k \lambda_{\rho, i} \leq \sum_{i=1}^k \lambda_{\gamma, i} \] for all $k \in \{1,\cdots,\dim{\X}\}$
+\end{definition}
+
+\begin{theorem}
+  Let $u,v \in \X \otimes \Y$ be unit vectors. The following statements are equivalent:\
+  \begin{enumerate}
+    \item $Tr_\Y(uu^*) \prec Tr_\Y(vv^*)$
+    \item There exists collections of operators $\{U_a\mid a \in \Sigma \} \subset \mathcal{U}(\X)$ and $\{B_a \mid a \in \Sigma\} \subset \LX$ for some indexing alphabet $a \in \Sigma$ such that
+    \begin{itemize}
+      \item $\sum_{a \in \Sigma} B_a^*B_a = \mathbb{I}_\Y$
+      \item $vv^* = \sum_{a \in \Sigma} (U_a \otimes B_a)uu^* (U_a \otimes B_a)^*$
+    \end{itemize}
+      \item There exists a separable channel $\Phi$ such that $vv^* = \Phi(uu^*)$
+  \end{enumerate}
+\end{theorem}
+
 
 \section{PPT States}
  Consider the transponse map $T: \mathcal{L}(\mathcal{L}(\mathcal{X}), \mathcal{L}(\mathcal{Y}))$ with the following action:
@@ -190,7 +221,8 @@ $(|\langle B, A \rangle| \leq ||B||_p||A||_{p^*})$ for $p,p^* \in [1,\infty]$ du
 \end{align*}
 
 The final step simply recognizes that $||(T \otimes I_{\LY})(P)||_1 = Tr(P)$ since $P \in \mathcal{PSD}(\X \otimes \Y)$ and transpose preserves the trace of $P$. By finally combining this with the above observations, we get the desired inequality.
-
 \end{proof}
+
+\section{Correlation Operators}
 
 \end{document}

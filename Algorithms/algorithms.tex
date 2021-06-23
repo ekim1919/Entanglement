@@ -1,12 +1,9 @@
-\documentclass{../quantum.tex}
+\section{Fundamental Quantum Algorithms}
 
-\begin{document}
-\section{Quantum Algorithms}
-
-This section will simply be a catalogue of ``classical" quantum algorithms and some of their properties. Many of these subsections will be based on the presentation given in \cite{childs17}.
+This section will simply be a catalogue of ``classical" quantum algorithms and some of their properties. Many of these subsections will be based on the presentation given in \cite{childs17} and \cite{batty2004quantum}.
 
 \subsection{Deutsch-Jozsa Algorithm}
-Let $f: \{0,1\} \rightarrow \{0,1\}$ be a boolean function with one-bit input. We would like to ascertain if $f$ is either constant (both inputs have the same value) or balanced (inputs have different values). Through the classical perspective, one would have to query the function twice to determine the state of $f$ as constant or balanced. However, we can leverage quantum mechanics so that $f$ will only have to be queried once.
+Let $f: \{0,1\} \rightarrow \{0,1\}$ be a boolean function with one-bit input. We would like to ascertain if $f$ is either constant (both inputs have the same value) or balanced (inputs have different values). Through the classical perspective, one would have to query the function twice to determine the state of $f$ as constant or balanced. However, we can leverage quantum mechanics so $f$ will only have to be queried once. This is a first step towards understanding the quantum speedup through \emph{query complexity}.
 %
 The following circuit accomplishes this:
 
@@ -20,7 +17,7 @@ The following circuit accomplishes this:
     \caption{Deutsch-Jozsa circuit}
 \end{figure}
 %
-where $U_f$ is the map with the action: $\ket{x}\ket{y} \mapsto \ket{x}\ket{y \oplus f(x)}$. We calculate the action of the first two steps of the circuit above as follows:
+where $U_f$ is the map with the action: $\ket{x}\otimes\ket{y} \mapsto \ket{x}\otimes\ket{y \oplus f(x)}$. We calculate the action of the first two steps of the circuit above as follows:
 %
 \begin{gather}
   \ket{0}\ket{1} \rightarrow \frac{1}{2}(\ket{0} + \ket{1})(\ket{0} - \ket{1}) = \frac{1}{2}(\ket{0}(\ket{f(0)} - \ket{1 \oplus f(0)}) + \ket{1}(\ket{f(1)} - \ket{1 \oplus f(1)})) = \\
@@ -94,33 +91,48 @@ $$ f(x) = \begin{cases}
             1 \text{ if } x = w \\
             0 \text{ otherwise}
           \end{cases} $$
-The crux of the algorithm comes from iterating a specially constructed unitary transformation $G$ composed with the oracle query gate $U_f$.
-$$ G = H^{\otimes n}(-I + 2\ket{0}\bra{0})H^{\otimes n} $$
+The crux of the algorithm comes from iterating a specially-constructed unitary transformation $D$ composed with the oracle query gate $O$.
+
+To begin, similar to the behavior found in the Deutsch-Jozsa, Bernstein-Vazirani algorithms, we exploit the phase-kickup technique by preparing the state $\ket{0^n} \otimes \ket{1}$, performing $O \circ(H^{\otimes n} \otimes H)$, then discarding the second register:
+
+\begin{equation}\label{GrovOpAction}
+\ket{0^n} \otimes \ket{1} \xrightarrow{\text{Query, Discard}} \frac{1}{\sqrt{2^n}} \sum_{x=0}^{2^n-1} (-1)^{f(x)} \ket{x}
+\end{equation}
 %
-Let us compute the action of $G$ on $\ket{x} \in (\mathbb{C}^2)^{\otimes n}$ as follows: We first compute the below expression:
+The second stage involves applying the below operator to the first $n$-qubit register.
+%
+$$ D = H^{\otimes n}(-I + 2\ket{0}\bra{0})H^{\otimes n} $$
+%
+Refer to $D$ as the \emph{Distillation Operator}. The composed operator $(D \otimes I) \circ U_f$ is denoted as the \emph{Grover Operator}. The middle term of $D$ is a conditional phase shift:
+
+\[ T = (-I + 2\ket{0}\bra{0})\] with the following action:
+
+\[ T\ket{0} = \ket{0}, \; T\ket{x} =-\ket{x} \text{for $  x \in \{1,\cdots, 2^n-1\}$}  \]
+
+Let us compute the action of $D$ on $\ket{x} \in (\mathbb{C}^2)^{\otimes n}$ as follows: first compute the below expression:
 %
 \begin{gather}
-  (-I + 2 \ket{0} \bra{0}) H^{\otimes n} \ket{x} = (-I + 2\ket{0}\bra{0})) \frac{1}{\sqrt{2^n}}\sum_{y=0}^{2^n-1} (-1)^{y\cdot x}\ket{y} = \\
+  (-I + 2 \ket{0} \bra{0}) H^{\otimes n} \ket{x} = (-I + 2\ket{0}\bra{0})) \frac{1}{\sqrt{2^n}}\sum_{y=}^{2^n-1} (-1)^{y\cdot x}\ket{y} = \\
   \frac{1}{\sqrt{2^n}} \big[ -\sum_{y=0}^{2^n-1}(-1)^{y\cdot x}\ket{y} + 2\ket{0}\big]
 \end{gather}
 %
 Now we apply the last $n$-qubit Hadamard transform to yield the following:
 %
 \begin{gather}
-  \frac{1}{\sqrt{2^n}}H^{\otimes n} \big[-\sum_{y=0}^{2^n-1}(-1)^{y\cdot x}\ket{y} + 2\ket{0} \big] = \frac{1}{2^n}\big[-\sum_{z = 0}^{2^n-1} \sum_{y=0}^{2^n-1}(-1)^{y\cdot(x+z)} \ket{y} + 2 \sum_{z = 0}^{2^n-1} \ket{z} \big] = \\
+  \frac{1}{\sqrt{2^n}}H^{\otimes n} \big[-\sum_{y=0}^{2^n-1}(-1)^{y\cdot x}\ket{y} + 2\ket{0} \big] = \frac{1}{2^n}\big[-\sum_{z = 0}^{2^n-1} \sum_{y=0}^{2^n-1}(-1)^{y\cdot(x\oplus z)} \ket{y} + 2 \sum_{z = 0}^{2^n-1} \ket{z} \big] = \\
   \frac{1}{2^n}(-2^n\ket{x} + 2 \ket{S})
 \end{gather}
 %
-where $\ket{S} = \sum_{z = 0}^{2^n-1} \ket{z}$ refers to the equally-weighted superposition state of $n$-qubits.
+where $\ket{S} = \sum_{z = 0}^{2^n-1} \ket{z}$.
 %
 The second-to-last equality follows from reindexing the sum with $y$-indices instead of $z$-indices. Note that the Hadamard transform is an inverse of itself, giving us $-\ket{x}$ as the first term.
 %
 Thus, we get that:
 %
-$$G\ket{x} = -\ket{x} + \frac{2}{2^n}\ket{S} $$
+$$D\ket{x} = -\ket{x} + \frac{2}{2^n}\ket{S} $$
 %
 and we deduce the following $2^n\times 2^n$ matrix representation:
-$$G = \left[ \begin{matrix}
+$$D = \left[ \begin{matrix}
         -1 + \frac{2}{2^n} & \frac{2}{2^n} & ... & \frac{2}{2^n} \\
         \frac{2}{2^n} & -1 + \frac{2}{2^n} & ... & \frac{2}{2^n} \\
         . & . &  ... & . \\
@@ -129,25 +141,52 @@ $$G = \left[ \begin{matrix}
         \frac{2}{2^n} & \frac{2}{2^n} & ... & -1 + \frac{2}{2^n}
       \end{matrix} \right]
  $$
+This operation is akin to the \emph{Inversion About the Mean} technique, which increases the amplitude of the solution $\ket{w} \otimes \ket{1}$ and deceases the amplitude of the others. To see this,  we find that the matrix $D$ acts on general quantum states as follows:
 
-The iteration of $GU_f$ has a geometric interpretation which we will now consider. Let $\ket{S}$ be the equally-weighted superposition and let $\ket{x_0}$ be the marked item:
-$$ \ket{S} = \frac{1}{\sqrt{N}} \sum_{x=0}^{2^n-1} \ket{x}  $$
+\begin{align*}
+D(\sum_{z=0}^{2^n-1} \alpha_z\ket{z})
+& = \sum_{z=0}^{2^n-1} \alpha_z (-\ket{z} + \frac{2}{2^n}\ket{S})
+%
+= -\sum_{z=0}^{2^n-1}\alpha_z \ket{z} + 2\sum_{k=0}^{2^n-1}\frac{\alpha_k}{2^n}\ket{S} \\
+%
+& = \sum_{z=0}^{2^n-1} \left( 2\sum_{k=0}^{2^n-1} \frac{\alpha_k}{2^n}   - \alpha_z \right)\ket{z}
+%
+ = \sum_{z=0}^{2^n-1} (2A -\alpha_z)\ket{z}
+\end{align*}
 
-Let $\theta$ be the angle between $S$ and $x_0^{\perp} = \frac{1}{\sqrt{N-1}}\sum_{x\neq x_0} \ket{x}$. This gives us the following representation:
-$$ \ket{S} =  \sin{\theta}x_0 + \cos{\theta}{x_0^{\perp}}$$
-Note that
-$$ \ket{S} = \frac{1}{\sqrt{N}}\sum_{x \neq x_0} \ket{x} + \frac{1}{\sqrt{N}}\ket{x_0} = \sqrt{\frac{N-1}{N}}\ket{x_0^{\perp}} + \frac{1}{\sqrt{N}}\ket{x_0}$$
+The string of equalities show that the amplitudes of the state are reflected across the their mean.
+
+\subsubsection{Geometric Interpretation}
+
+The iteration of $DU_f$ has a geometric interpretation which we will now consider. Let $\ket{\psi}$ be the equally-weighted superposition and let $\ket{x_0}$ be the marked item:
+$$ \ket{\psi} = \frac{1}{\sqrt{N}} \sum_{x=0}^{2^n-1} \ket{x} $$
+%
+We can express $\ket{\psi}$ as
+$$ \ket{\psi} = \frac{1}{\sqrt{N}}\sum_{x \neq x_0} \ket{x} + \frac{1}{\sqrt{N}}\ket{x_0} = \sqrt{\frac{N-1}{N}}\ket{x_0^{\perp}} + \frac{1}{\sqrt{N}}\ket{x_0}$$
+%
+A crucial observation arises from the action of the Grover Operator $G$ on the subspace $T = \span{\ket{x_0}, \ket{x_0^{\perp}}}$. Let us show that $G$ actually \emph{fixes} the subspace $T$. First,
+the oracle operator $O$, has the following action on vector $ \alpha \ket{x_0^{\perp}} + \beta \ket{x_0}$,
+\[ O(\alpha \ket{x_0^{\perp}} + \beta \ket{x_0}) = \alpha \ket{x_0^{\perp}} - \beta \ket{x_0}\]
+This follows from the action discussed in \ref{GrovOpAction}. The application of the distillation operator to the vector $\alpha \ket{x_0^{\perp}} + \beta \ket{x_0}$ results in the following:
+
+\[D(\alpha \ket{x_0^{\perp}} + \beta \ket{x_0}) = 2 \alpha \bra{\psi}\ket{x_0^{\perp}}\ket{\psi} + 2 \beta \bra{\psi}\ket{x_0}\ket{\psi}  - \alpha\ket{x_0^{\perp}} - \beta\ket{x_0} \]
+
+Since $\ket{\psi} \in T$, the derivation shows that indeed $T$ is a $G$-invariant subspace. In fact, we can go even further and deduce that the distillation operator $D$ is actually a reflection, making $G$ a operator which rotates the starting state $\ket{\psi}$ counter-clockwise on the plane spanned by $\ket{x_0^{\perp}},\ket{x_0}$. It turns out that iterations of $G$ applied on $\ket{\psi}$ brings the output state closer to $\ket{x_0}$. However, we have to perform some analysis to ensure that our procedure doesn't ``overshoot" $\ket{x_0}$.
+
+Let $\theta$ be the angle between $\ket{\psi}$ and $x_0^{\perp} = \frac{1}{\sqrt{N-1}}\sum_{x\neq x_0} \ket{x}$. This gives us the following representation:
+$$ \ket{\psi} =  \cos{\theta}{x_0^{\perp}} + \sin{\theta}x_0 $$
+
 Thus,
-$$\sin{\theta} = \bra{x_0}\ket{S} = \frac{1}{\sqrt{N}}$$
+$$\sin{\theta} = \bra{x_0}\ket{\psi} = \frac{1}{\sqrt{N}}$$
 implying that
 $$ \theta \approx \frac{1}{\sqrt{N}} $$ for sufficiently large $N$.
 We claim the following:
 \begin{enumerate}
-  \item $U_f$ corresponds to a reflection across hyperplane orthogonal to $\ket{x_0}$.
-  \item $G$ corresponds to a reflection across hyperplane orthogonal to $\ket{S}$.
+  \item $O$ corresponds to a reflection across hyperplane orthogonal to $\ket{x_0}$.
+  \item $D$ corresponds to a reflection across hyperplane orthogonal to $\ket{\psi}$.
 \end{enumerate}
 
-These two operations rotate generic unit vector $\ket{\Psi}$ by $2\theta$. To see this, imagine a generic unit vector $\ket{\Psi}$ some angle $\theta_0$ from $x_0^{\perp}$ on the two-dimensional plane spanned by $\ket{x_0}$ and $\ket{x_0^{\perp}}$. Assume that we orient our plane such that we visualize $\ket{x_0^{\perp}}$ as our horizontal axis and $\ket{x_0}$ as our vertical axis. Reflecting across the axis $\ket{x_0^{\perp}}$ rotates our $\ket{\Psi}$ $2\theta_0$ clockwise, giving position $-\theta_0$. Then reflecting it across axis $\ket{S}$ rotates it by $2(\theta_0 + \theta)$, giving the angle $2(\theta_0 + \theta) - \theta_0 = \theta_0 + 2\theta$.
+These two operations rotate $\ket{\psi}$ by $2\theta$. To see this, imagine a generic unit vector $\ket{\Psi}$ some angle $\theta_0$ from $x_0^{\perp}$ on the two-dimensional plane spanned by $\ket{x_0}$ and $\ket{x_0^{\perp}}$. Assume that we orient our plane such that we visualize $\ket{x_0^{\perp}}$ as our horizontal axis and $\ket{x_0}$ as our vertical axis. Reflecting across the axis $\ket{x_0^{\perp}}$ rotates our $\ket{\Psi}$ $2\theta_0$ clockwise, giving position $-\theta_0$. Then reflecting it across axis $\ket{S}$ rotates it by $2(\theta_0 + \theta)$, giving the angle $2(\theta_0 + \theta) - \theta_0 = \theta_0 + 2\theta$.
 
 Since $\theta \approx \frac{1}{\sqrt{N}}$ is close to zero for sufficiently large $N$, it suffices to rotate our equally-weighted superposition $\ket{S}$ around $\frac{\pi}{2}$ to become close to $\ket{x_0}$ as $\ket{x_0^{\perp}},\ket{x_0}$ are orthogonal to each other. We thus solve the following:
 $$2k\theta \approx \frac{\pi}{2} \implies k = \frac{\sqrt{N}\pi}{4} $$
@@ -254,5 +293,4 @@ Then $\phi = \frac{2\pi y}{2^n}$. Substituting this in the expression above and 
 
 (Todo: think about the general case)
 
-
-\end{document}
+\subsection{Watrous' Algorithm for Solvable Groups}
