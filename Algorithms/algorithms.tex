@@ -1,6 +1,8 @@
+
+
 \section{Fundamental Quantum Algorithms}
 
-This section will simply be a catalogue of ``classical" quantum algorithms and some of their properties. Many of these subsections will be based on the presentation given in \cite{childs17} and \cite{batty2004quantum}.
+This section will simply be a catalogue of quantum algorithms and some of their properties. Many of these subsections will be based on the presentations given in \cite{childs17} and \cite{batty2004quantum}.
 
 \subsection{Deutsch-Jozsa Algorithm}
 Let $f: \{0,1\} \rightarrow \{0,1\}$ be a boolean function with one-bit input. We would like to ascertain if $f$ is either constant (both inputs have the same value) or balanced (inputs have different values). Through the classical perspective, one would have to query the function twice to determine the state of $f$ as constant or balanced. However, we can leverage quantum mechanics so $f$ will only have to be queried once. This is a first step towards understanding the quantum speedup through \emph{query complexity}.
@@ -164,7 +166,7 @@ $$ \ket{\psi} = \frac{1}{\sqrt{N}} \sum_{x=0}^{2^n-1} \ket{x} $$
 We can express $\ket{\psi}$ as
 $$ \ket{\psi} = \frac{1}{\sqrt{N}}\sum_{x \neq x_0} \ket{x} + \frac{1}{\sqrt{N}}\ket{x_0} = \sqrt{\frac{N-1}{N}}\ket{x_0^{\perp}} + \frac{1}{\sqrt{N}}\ket{x_0}$$
 %
-A crucial observation arises from the action of the Grover Operator $G$ on the subspace $T = \span{\ket{x_0}, \ket{x_0^{\perp}}}$. Let us show that $G$ actually \emph{fixes} the subspace $T$. First,
+A crucial observation arises from the action of the Grover Operator $G$ on the subspace $T = \text{span}\{\ket{x_0}, \ket{x_0^{\perp}}\}$. Let us show that $G$ actually \emph{fixes} the subspace $T$. First,
 the oracle operator $O$, has the following action on vector $ \alpha \ket{x_0^{\perp}} + \beta \ket{x_0}$,
 \[ O(\alpha \ket{x_0^{\perp}} + \beta \ket{x_0}) = \alpha \ket{x_0^{\perp}} - \beta \ket{x_0}\]
 This follows from the action discussed in \ref{GrovOpAction}. The application of the distillation operator to the vector $\alpha \ket{x_0^{\perp}} + \beta \ket{x_0}$ results in the following:
@@ -293,4 +295,51 @@ Then $\phi = \frac{2\pi y}{2^n}$. Substituting this in the expression above and 
 
 (Todo: think about the general case)
 
+\newcommand{\R}{{\bf R}}
+\newcommand{\A}{{\bf A}}
+
+
 \subsection{Watrous' Algorithm for Solvable Groups}
+Watrous showed that recovering the generators and their orders for the case of solvable groups can be computed efficiently using a quantum computer \cite{watrous2001quantum}. Recall that the \emph{commutator subgroup} of $G$ is defined as
+\[ G' = [G,G] = \{ghg^{-1}h^{-1} \mid g,h \in G \} \]
+%
+From the observation that $[G,G]$ is actually normal in $G$, construct the tower of subgroups
+\[ G \trianglerighteq G' \trianglerighteq  (G')' \trianglerighteq  \cdots \]
+named the \emph{derived series} of $G$. This tower is not guaranteed to be finite for general groups. However, groups whose derived series collapses at $\{e\}$ are deemed \emph{solvable}
+%
+\[ \{e\} = N_0 \trianglelefteq N_1 \trianglelefteq N_2 \cdots \trianglelefteq N_m = G \]
+%
+An equivalent characterization of solvable group $G$ is if there exist a set of generators $g_1,\cdots, g_m \in G$ and finitely-generated subgroups $H_j = \langle g_1,\cdots, g_j \rangle$ such that $G$ can be expressed as a composition series $\{e\} = H_0 \trianglelefteq H_1 \trianglelefteq \cdots \trianglelefteq H_m = G$ with the $H_j / H_{j-1}$ being cyclic $p$-groups for all such $j$. In other words, $H_j = \bigsqcup_{i = 0}^{\alpha_j} g_j^{i} H_j$ where some power of a prime $p$. See \cite{aluffi2009algebra} for more information about composition series and their refinements.
+
+Babai and Beals presented a classical Monte-Carlo algorithm to determine the generators in polynomial time \cite{babai1995fast} for finite groups. With this baseline, it suffices to determine the orders of the generators $\alpha_j$. To accomplish this, we will need access to uniform superpositions of the $H_j$ to perform a close variant of Shor's algorithm. Watrous' algorithm is divided into two phases for step $j$. Assume that we have access to the uniform superposition
+%
+\[\ket{H_{j-1}} = \frac{1}{\sqrt{|H_{j-1}}|} \sum_{h \in H_{j-1}} \ket{h} \]
+%
+For ease of notation, we will denote $H_{j-1}$ as $H$, the generator $g_{j}$ as $g$, and the order of $g$, $\alpha_j$, as $\alpha$. Furthermore, assume that we have determined $m$ generators for our finite group $G$. The algorithm utilizes a large number of registers which are defined $\R$ or $\A$ registers whose definitions will be fleshed out in the coming sections.
+
+\subsubsection{Phase One of Step $j$}
+For this phase, we assume we have access to a uniform superposition $\ket{H}$ initialized in a quantum register $\R$. We can think of $\R$ just as some finite dimensional complex Hilbert space with an orthogonal basis indexed by the group elements of $G$. Furthermore, our $\A$ register will have an orthogonal basis index by $\mathbb{Z}_M$ for some sufficiently large $M$ to be determined later on. The $\A$ is initialized to $\ket{0}$.
+%
+Suppose we also have access to the unitary operators $M: \R \otimes \R \rightarrow \R$ and $V_g: \A \otimes
+\R \rightarrow \R$ with the following actions:
+%
+\begin{align*}
+  & M(\ket{g} \otimes \ket{h}) = \ket{gh} \quad g,h \in G \\
+  & V_g \ket{a} \otimes \ket{h} = \ket{g^ah} \quad b \in \mathbb{Z}_M, h \in G
+\end{align*}
+%
+We now begin with the entangled state $\ket{0} \otimes \ket{H} \in \A \otimes \R$. The operations below yield the following:
+%
+\begin{gather*}
+\ket{0} \otimes \ket{H} \xrightarrow{QFT_{M} \otimes I_\R} \frac{1}{\sqrt{M}} \sum_{a \in \mathbb{Z}_M} \ket{a} \otimes \ket{H} \xrightarrow{V_g} \frac{1}{\sqrt{M}} \sum_{a \in \mathbb{Z}_M} \ket{a} \otimes \ket{g^aH} \\
+\xrightarrow{QFT^{-1}_M \otimes I_\R} \frac{1}{M}  \sum_{a \in \mathbb{Z}_M} \sum_{b \in \mathbb{Z}_M} e^{-2\pi ab/M}\ket{b} \otimes \ket{g^aH}
+\end{gather*}
+
+The observation of the $\A$ register will lead to an analysis similar to that of Shor's algorithm. (Fill this part in).
+
+\subsubsection{Phase Two of Step $j$}
+We now need a method to generate uniform superpositions of $H_j$ from those of $H_{j-1}$. We can view these uniform superpositions as resources for sampling required in Phase One through Shor's Algorithm. Assuming we have access to $\ell$ copies of $\ket{H_{j-1}}$, we can generate $\ell - 1$ copies of $H_{j}$ for the next step using a clever trick outlined below. First, we set the stage.
+
+Let $\R_1, \R_2, \cdots \R_\ell$ denote the copies of $\ket{H_{j-1}}$ and $\A_1, \A_2, \cdots \A_\ell$ the corresponding $\A$ registers initialized to $\ket{0}$. We will be considering the entangled pairs $\R_i \otimes \A_i$ for $1 \leq i \leq \ell$.
+
+%There are $m$ $R$ registers $\R_1,\R_2, \cdots, \R_m$ and $\A$ registers $\A_1, \A_2, \cdots, \A_m$. The $j^{th}$ step utilizes the $\R_j, \A_j$ registers where $\R_j$ has orthogonal basis vectors indexed by group elements
