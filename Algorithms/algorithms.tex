@@ -298,7 +298,6 @@ Then $\phi = \frac{2\pi y}{2^n}$. Substituting this in the expression above and 
 \newcommand{\R}{{\bf R}}
 \newcommand{\A}{{\bf A}}
 
-
 \subsection{Watrous' Algorithm for Solvable Groups}
 Watrous showed that recovering the generators and their orders for the case of solvable groups can be computed efficiently using a quantum computer \cite{watrous2001quantum}. Recall that the \emph{commutator subgroup} of $G$ is defined as
 \[ G' = [G,G] = \{ghg^{-1}h^{-1} \mid g,h \in G \} \]
@@ -320,11 +319,11 @@ For ease of notation, we will denote $H_{j-1}$ as $H$, the generator $g_{j}$ as 
 \subsubsection{Phase One of Step $j$}
 For this phase, we assume we have access to a uniform superposition $\ket{H}$ initialized in a quantum register $\R$. We can think of $\R$ just as some finite dimensional complex Hilbert space with an orthogonal basis indexed by the group elements of $G$. Furthermore, our $\A$ register will have an orthogonal basis index by $\mathbb{Z}_M$ for some sufficiently large $M$ to be determined later on. The $\A$ is initialized to $\ket{0}$.
 %
-Suppose we also have access to the unitary operators $M: \R \otimes \R \rightarrow \R$ and $V_g: \A \otimes
-\R \rightarrow \R$ with the following actions:
+Suppose we also have access to the unitary operators $M: \R \otimes \R \rightarrow \R \otimes \R$ and $V_g: \A \otimes
+\R \rightarrow \R$ with the following actions on basis vectors:
 %
 \begin{align*}
-  & M(\ket{g} \otimes \ket{h}) = \ket{gh} \quad g,h \in G \\
+  & M\ket{g} \otimes \ket{h} = \ket{g} \otimes \ket{gh} \quad g,h \in G \\
   & V_g \ket{a} \otimes \ket{h} = \ket{g^ah} \quad b \in \mathbb{Z}_M, h \in G
 \end{align*}
 %
@@ -335,11 +334,77 @@ We now begin with the entangled state $\ket{0} \otimes \ket{H} \in \A \otimes \R
 \xrightarrow{QFT^{-1}_M \otimes I_\R} \frac{1}{M}  \sum_{a \in \mathbb{Z}_M} \sum_{b \in \mathbb{Z}_M} e^{-2\pi ab/M}\ket{b} \otimes \ket{g^aH}
 \end{gather*}
 
-The observation of the $\A$ register will lead to an analysis similar to that of Shor's algorithm. (Fill this part in).
+The observation of the $\A$ register will lead to an analysis similar to that of Shor's algorithm. From \cite{watrous2001quantum}, it turns out that setting $M = 2^{2n + \mathcal{O}(1/\epsilon)}$ suffices for our $\A$ register dimension.
+
+(Fill this part in).
 
 \subsubsection{Phase Two of Step $j$}
-We now need a method to generate uniform superpositions of $H_j$ from those of $H_{j-1}$. We can view these uniform superpositions as resources for sampling required in Phase One through Shor's Algorithm. Assuming we have access to $\ell$ copies of $\ket{H_{j-1}}$, we can generate $\ell - 1$ copies of $H_{j}$ for the next step using a clever trick outlined below. First, we set the stage.
+We now need a method to generate uniform superpositions of $H_j$ from those of $H_{j-1}$. We can view these uniform superpositions as resources for sampling required in Phase One through Shor's Algorithm. Assuming we have access to $\ell$ copies of $\ket{H_{j-1}}$, we can generate $\ell - 1$ copies of $H_{j}$ for the next step using a clever trick outlined below. First, we note that the orders $\alpha_i$ have been
 
-Let $\R_1, \R_2, \cdots \R_\ell$ denote the copies of $\ket{H_{j-1}}$ and $\A_1, \A_2, \cdots \A_\ell$ the corresponding $\A$ registers initialized to $\ket{0}$. We will be considering the entangled pairs $\R_i \otimes \A_i$ for $1 \leq i \leq \ell$.
+Let $\R_1, \R_2, \cdots \R_\ell$ denote the copies of $\ket{H_{j-1}}$ and $\A_1, \A_2, \cdots \A_\ell$ the corresponding $\A$ registers initialized to $\ket{0}$. Once again, we denote the uniform superposition $\ket{H_{j-1}}$ as $\ket{H}$ and label the variables $\alpha_i, g_i$ as $\alpha, g$ respectively.
+
+We will be considering the entangled pairs $\A_i \otimes \R_i$ for $1 \leq i \leq \ell$ and perform the following series of unitary operations:
+
+\begin{align*}
+  \ket{0} \otimes \ket{H}
+  & \xrightarrow{QFT^{-1} \otimes I_{\bf R_i}} \frac{1}{\sqrt{\alpha}} e^{2\pi a_i/\alpha} \ket{a_i} \otimes \ket{H} \xrightarrow{V_g} \frac{1}{\sqrt{\alpha}}\sum_{a_i \in \mathbb{Z_\alpha}} \ket{a_i} \otimes \ket{g^{a_i}H} \\
+  & \xrightarrow{QFT \otimes I_{\bf R_i}} \frac{1}{\alpha}\sum_{a_i \in \mathbb{Z}_\alpha}\sum_{b_i \in \mathbb{Z}_\alpha} e^{2\pi i a_ib_i } \ket{b_i} \otimes \ket{g^{a_i}H}
+\end{align*}
+%
+Now by measuring the ${\bf A_i}$ register and discarding it, we get the following state with uniform probability and the measurement $b_i$:
+%
+\[\ket{\psi_i} = \frac{1}{\sqrt{r}} \sum_{a_i \in \mathbb{Z}_\alpha} e^{2\pi i a_i b_i / \alpha} \ket{g^{a_i}H} \]
+%
+Repeat this for all ${\bf A_i} \otimes {\bf R_i}$ yield the measurements $b_1, \cdots, b_\ell$ and states $\ket{\psi_1}, \cdots, \ket{\psi_\ell}$ for all $1 \leq i \leq \ell$.
+%
+So all that really remains is to get rid of the phase in front of the state somehow. It turns out that you can use a state $\ket{\psi_k}$ where $b_k$ relatively prime to $b_\ell$ to remove phase for all $\ket{\psi_i}$ for $i \neq k$. To see this, assume that we have found such a $b_k$ in order to consider the state in ${\bf R_i} \otimes {\bf R_k}, \ket{\psi_i} \otimes \ket{\psi_k}$, and the unitary operator $M_{(g^{a_i}h)^c}$ with the action:
+%
+\[ M_{(g^{a_i})^ch} \ket{z} \rightarrow  \ket{(g^{a_i})^chz}, \quad z \in G\]
+%
+We first show that $\ket{\psi_k}$ is an eigenvector of the $M_{g^{a_i}h}$ operator:
+\begin{align*}
+M_{g^{a_i}h} \ket{\psi_k}
+& = \frac{1}{\sqrt{r}} \sum_{a_k \in \mathbb{Z}_\alpha} e^{2\pi i a_kb_k / \alpha} M_{g^{a_i}h} \ket{g^{a_k}H} =  \frac{1}{\sqrt{r}|H|} \sum_{a_k \in \mathbb{Z}_\alpha} \sum_{h' \in H} e^{2\pi i a_kb_k / \alpha} M_{g^{a_i}h} \ket{g^{a_k}h'} \\
+& = \frac{1}{\sqrt{r}|H|} \sum_{a_k \in \mathbb{Z}_\alpha} \sum_{h' \in H} e^{2\pi i a_kb_k / \alpha} \ket{g^{a_i+a_k}h''h'} = \frac{1}{\sqrt{r}|H|} \sum_{a_k \in \mathbb{Z}_\alpha} \sum_{h' \in H} e^{2\pi i (a_k-a_i)b_k / \alpha} \ket{g^{a_k}h'} \\
+& =  e^{-2\pi i a_ib_k}  \frac{1}{\sqrt{r}} \sum_{a_k \in \mathbb{Z}_\alpha} e^{2\pi i a_kb_k / \alpha} \ket{g^{a_k}H} \\
+& = e^{-2\pi i a_ib_k} \ket{\psi_k}
+\end{align*}
+%
+The third equality follows from the normality of $H$ as there must exist some $h'' \in H$ such that $hg^{a_i} = g^{a_i}h''$.
+%
+Using this fact, we can easily show that simply composing the multiplication operator on the state $\ket{\psi_i} \otimes \ket{\psi_k}$ $c$ times where $c = b_ib_k^{-1} \mod \alpha$. Such a $c$ must exist since $b_k$ is relatively prime to $r$. Now observe the following unitary transformations:
+
+\begin{align*}
+\ket{\psi_i} \otimes \ket{\psi_k}
+& = \frac{1}{\sqrt{r}}\sum_{a_i \in \mathbb{Z}_\alpha} \sum_{h \in H} e^{2 \pi i a_i b_i / \alpha} \ket{g^{a_i}h} \otimes \ket{\psi_k} \xrightarrow{M^c}  \frac{1}{\sqrt{r}}\sum_{a_i \in \mathbb{Z}_\alpha} \sum_{h \in H} e^{2 \pi i a_i b_i / \alpha} \ket{g^{a_i}h} \otimes M_{(g^{a_i}h)^c}\ket{\psi_k} \\
+& = \frac{1}{\sqrt{r}}\sum_{a_i \in \mathbb{Z}_\alpha} \sum_{h \in H} e^{2 \pi i a_i b_i / \alpha} \ket{g^{a_i}h} \otimes e^{-2\pi i ca_ib_k}\ket{\psi_k} = \frac{1}{\sqrt{r}}\sum_{a_i \in \mathbb{Z}_\alpha} \sum_{h \in H} \cancel{e^{2 \pi i a_i b_i / \alpha}} \ket{g^{a_i}h} \otimes \cancel{e^{-2\pi ia_ib_i}}\ket{\psi_k} \\
+& = \ket{\langle g \rangle H} \otimes \ket{\psi_{k}}
+\end{align*}
+%
+Thus, with $\ket{\psi_k}$, we can turn $\ell$ $\R$ registers initialized to $\ket{H}$ to $\ell -1$ registers set to $\ket{\langle g \rangle H} = \ket{H_j}$. The algorithm can now proceed to the next step.
+%
+We now outline the full algorithm for the finite cyclic tower $\{e\} = H_0 \trianglelefteq H_1 \trianglelefteq H_2 \cdots \trianglelefteq H_m = G$: \newline
+
+\hrule
+\begin{enumerate}
+  \item Prepare $(k+1)(m+1)$ $\R$ registers in state $\ket{H_0}$ where $k$ is the number of trials required to output the correct order through Shor's Algorithm at every step with high probability.
+  \item Perform phase one of the algorithm to find the orders $\alpha_j$ at step $j$ using $k$ copies of $\ket{H_{j-1}}$.
+  \item Use one of the copies of $\ket{H_{j-1}}$ to turn the remaining copes of $\ket{H_{j-1}}$ into $\ket{H_{j}}$ through phase two.
+  \item Output the $\alpha_1, \cdots, \alpha_m$
+\end{enumerate}
+\hrule
+
+Note that here we tacitly assume that we have a commensurate number of $\A$ registers all initialzed to $\ket{0}$ with the proper dimensions required in phase one and two.
+
+\begin{tcolorbox}
+  \begin{itemize}
+    \item I wonder if we can use this technique over finite fields $\mathbb{F}_p$ for some prime power $p$ to compute some interesting objects studied in Galois Theory
+    \item Is there a way to extend these algorithms to find generators for intersections of subgroups. Could be interested to find an algorithm to calculate refinements through Schrier refinement theorem, Zassenhaus' Butterfly lemma.
+  \end{itemize}
+
+\end{tcolorbox}
+
+
+
 
 %There are $m$ $R$ registers $\R_1,\R_2, \cdots, \R_m$ and $\A$ registers $\A_1, \A_2, \cdots, \A_m$. The $j^{th}$ step utilizes the $\R_j, \A_j$ registers where $\R_j$ has orthogonal basis vectors indexed by group elements

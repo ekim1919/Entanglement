@@ -8,6 +8,8 @@
 \usepackage{amsmath,amsfonts,amssymb,amsthm}
 \usepackage{physics}
 \usepackage{qcircuit}
+\usepackage{cancel}
+\usepackage{tcolorbox}
 
 \newtheorem{theorem}{Theorem}
 \newtheorem{lemma}{Lemma}
@@ -18,6 +20,10 @@
 \date{\vspace{-2ex}\today}
 \begin{document}
 \maketitle
+
+\renewcommand{\baselinestretch}{0.25}\normalsize
+\tableofcontents
+\renewcommand{\baselinestretch}{1.0}\normalsize
 
 \input{algorithms}
 \input{hsp}
