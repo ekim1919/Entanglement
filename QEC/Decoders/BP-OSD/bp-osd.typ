@@ -1,11 +1,10 @@
 #import "tufte-handout.typ": template, margin-note
 #import "personal_thm_envs.typ": *
 
-#let topic = "BP-OSD Decoders"
+#let paper_title = "Degenerate Quantum LDPC Codes with Good Finite Length Performance"
 
-#show: doc => template(title: "Notes on " + topic, doc)
+#show: doc => template(title: "Notes on " + paper_title, doc)
 #set heading(numbering: "1.")
-#set math.equation(numbering: "(1)")
 
 = Notes on BP-OSD Decoding for qLDPC Codes.
 
@@ -28,7 +27,7 @@ Consequently, $I$ is an information set for $cal(C)$ iff $"rank"(G_I) = "rank"(G
 
 For $I subset.eq [n]$, let $overline(I)$ denote its complement $[n] backslash I$. It is not to difficult to show that $overline(I)$ is an information set for the dual code $cal(C)^perp$. Furthermore, there is duality between information sets and their complements as evinced by the following equality:
 
-$ op("arg max", limits: #true)_(I in cal(I)_G) sum_(i in I) w_i = op("arg min", limits: #true)_(J in cal(I)_H) sum_(i in J) w_i $ <min_max>
+$ op("arg max", limits: #true)_(I in cal(I)_G) sum_(i in I) w_i = op("arg min", limits: #true)_(J in cal(I)_H) sum_(i in J) w_i $
 
 where $w_i$ are positive reals and $cal(I)_G$ consists of all the information sets over the columns of $G$ with $cal(I)_H$ defined similarly.
 
@@ -43,8 +42,7 @@ In other words, given the values of the error vector along $I$, $e_I$ and the sy
     - $e_I = hat(e)_I$
     - $H e = s$
 
-where $e_I = [ e_i bar.v i in I ]$ is the "punctured" error vector at indices contained in set $I$. In other words,
-we wish to ensure that $e = xi^s_I(hat(e)_I)$ over the _most_ _reliabile_ information set. The hard decision vector can come from a BP decoder who finds the MLE (Maximum-likelihood Error).
+where $e_I = [ e_i bar.v i in I ]$ is the "punctured" error vector at indices contained in set $I$. The hard decision vector can come from a BP decoder who finds the MLE (Maximum-likelihood Error).
 
 + The _order_ _w_ BP-OSD decoder performs a similar procedure except we take the $w$ least-reliable column indices computed by a fixed reliability metric, and instead of relying on specific hard decisions, we simply test all $2^w$ bit strings. The output will be the decoded error with the least weight. A specific instance is detailed in @sec_pv_bp_osd
 
@@ -53,7 +51,8 @@ we wish to ensure that $e = xi^s_I(hat(e)_I)$ over the _most_ _reliabile_ inform
 + Classical BP decoders cause issues when decoding Quantum LDPC Codes due to the existence of $4$-cycles. There are ways to prune these cycles if the code is CSS, but the highly degenerate nature of the codes can still break BP decoding.
 + The authors attempt to rectify this hit in performance by enriching the classical BP decoder with Ordered Statistics Decoding (OSD) post-processing. This is a slight difference between the decoding algorithm presented here and the standard OSD decoders found in the classical decoding literature.
 
-+ The reliability measure associated with bit $i$ is defined as $rho_i = PP[hat(e)_i = e_i]$ or the probability of the hard decision made on bit $i$ is indeed correct. Hence, the reliability of the total hard decision vector is set to be $rho = product_(i=1)^n rho_i$. The question is how do we find an information set $I$ which maximizes $rho_I = product_(i in I) rho_i$? Recall @min_max and take $w_i = "log"(rho_i)$.
++ The reliability measure associated with bit $i$ is defined as $rho_i = PP[hat(e)_i = e_i]$ or the probability of the hard decision made on bit $i$ is indeed correct. Hence, the reliability of the total hard decision vector is set to be $rho = product_(i=1)^n rho_i$. The question is how do we find an information set $I$ which maximizes $rho_I = product_(i in I) rho_i$?
+    Remember
 
 #margin-note[Note that these modifications are tailored to be a sub-procedure during the decoding process for Quantum errors.]
 
